@@ -75,7 +75,6 @@ def operation():
 
 
 # 训练函数
-
 def train_model(
 		model, optimizer, criterion, X_train, y_train, X_val, y_val, epochs, batch_size):
 	train_losses, val_losses = [], []
@@ -103,21 +102,22 @@ def train_model(
 			val_loss = criterion(val_predictions, y_val).item()
 			val_losses.append(val_loss)
 
-		print(f"Epoch {epoch + 1 :03d}/{epochs},"
-			  f"Train Loss: {train_losses[-1]:.4f},"
-			  f"Val Loss: {val_losses[-1]:.4f}")
+		print(
+			f"Epoch {epoch + 1 :03d}/{epochs},"
+			f"Train Loss: {train_losses[-1]:.4f},"
+			f"Val Loss: {val_losses[-1]:.4f}")
 
 	return train_losses, val_losses
 
 
 # 训练不同参数的模型
-def run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size):
+def run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size, parameters):
 	experiment_results_depth, experiment_results_lr, experiment_results_act = {}, {}, {}
 	dim = X_train.shape[1]
 
-	depths = [[32], [64, 32], [128, 64, 32]]
-	activation_functions = [nn.ReLU, nn.Sigmoid, nn.Tanh]
-	learning_rates = [0.01, 0.001, 0.0001]
+	depths = parameters["depths"]
+	activation_functions = parameters["activation_functions"]
+	learning_rates = parameters["learning_rates"]
 	criterion = nn.MSELoss()
 
 	# 深度对比实验
@@ -128,7 +128,7 @@ def run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size):
 		train_losses, val_losses = train_model(
 			model, optimizer, criterion, X_train, y_train, X_val, y_val, epochs, batch_size)
 		experiment_results_depth[f"Depth {depth}"] = (train_losses, val_losses)
-	plot_results(experiment_results_depth)
+	plot_results(experiment_results_depth, "Comparison of Different Depths")
 
 	# 激活函数对比实验
 	for act_fn in activation_functions:
@@ -138,7 +138,7 @@ def run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size):
 		train_losses, val_losses = train_model(
 			model, optimizer, criterion, X_train, y_train, X_val, y_val, epochs, batch_size)
 		experiment_results_act[f"Activation {act_fn.__name__}"] = (train_losses, val_losses)
-	plot_results(experiment_results_act)
+	plot_results(experiment_results_act, "Comparison of Different Activation Functions")
 
 	# 学习率对比实验
 	for lr in learning_rates:
@@ -148,18 +148,17 @@ def run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size):
 		train_losses, val_losses = train_model(
 			model, optimizer, criterion, X_train, y_train, X_val, y_val, epochs, batch_size)
 		experiment_results_lr[f"LR {lr}"] = (train_losses, val_losses)
-	plot_results(experiment_results_lr)
+	plot_results(experiment_results_lr, "Comparison of Different Learning Rates")
 
 
 # 画图对比
-
-def plot_results(experiment_results):
+def plot_results(experiment_results, title):
 	plt.figure(figsize=(12, 6))
 	for key, (train_losses, val_losses) in experiment_results.items():
 		plt.plot(val_losses, label=key)
 	plt.xlabel("Epochs")
 	plt.ylabel("Validation Loss")
-	plt.title("Comparison of Different Hyperparameter Settings")
+	plt.title(title)
 	plt.legend()
 	plt.show()
 
@@ -169,11 +168,15 @@ def evaluate_model(
 		hidden_layers, activation_fn, lr,
 		X, X_test, y_test, X_train, y_train, X_val, y_val,
 		epochs,  batch_size):
+	evaluate_results = {}
 	final_model = FNN(X.shape[1], hidden_layers, activation_fn)
 	final_optimizer = optim.Adam(final_model.parameters(), lr)
 	final_criterion = nn.MSELoss()
-	train_model(final_model, final_optimizer, final_criterion,
-				X_train, y_train, X_val, y_val, epochs, batch_size)
+	train_losses, val_losses = train_model(
+		final_model, final_optimizer, final_criterion,
+		X_train, y_train, X_val, y_val, epochs, batch_size)
+	evaluate_results["evaluate"] = (train_losses, val_losses)
+	plot_results(evaluate_results, "Selected Parameters")
 
 	final_model.eval()
 	with torch.no_grad():
@@ -186,8 +189,18 @@ def evaluate_model(
 # 主函数
 def main():
 	test_size = 0.2
-	hidden_layers, active_fn, learning_rates = [64, 32], nn.ReLU, 0.001
 	epochs, batch_size = 100, 32
+
+	# 设置实验参数
+	parameters  = {
+		"depths": [[32], [64, 32], [128, 64, 32], [256, 128, 64, 32], [512, 256, 128, 64, 32]],
+		"activation_functions": [nn.ReLU, nn.Sigmoid, nn.Tanh],
+		"learning_rates": [0.01, 0.001, 0.0001]}
+
+	# 设置最终参数
+	hidden_layers = [64, 32]
+	active_fn = nn.ReLU
+	learning_rates = 0.001
 
 	X, y, loaded = load_dataset()
 
@@ -195,11 +208,12 @@ def main():
 		X_train, X_val, X_test, y_train, y_val, y_test = divide_dataset(X, y, test_size)
 
 		if operation() == 0:
-			run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size)
+			run_experiments(X_train, y_train, X_val, y_val, epochs, batch_size, parameters)
 
 		else:
-			evaluate_model(hidden_layers, active_fn, learning_rates,
-						   X, X_test, y_test, X_train, y_train, X_val, y_val, epochs, batch_size)
+			evaluate_model(
+				hidden_layers, active_fn, learning_rates,
+				X, X_test, y_test, X_train, y_train, X_val, y_val, epochs, batch_size)
 
 
 if __name__ == '__main__':
