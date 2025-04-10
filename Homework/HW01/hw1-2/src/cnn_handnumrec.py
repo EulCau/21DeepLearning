@@ -7,10 +7,10 @@ import torch.nn as nn
 import torch.optim as optim
 
 from cnn_builder import build_cnn
-from load_dataset import train_loader, test_loader
+from load_dataset import load_data
 
 # 初始化
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 model = build_cnn(
 	1, [16, 32], 3,
@@ -22,6 +22,8 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 # 训练与验证
 best_acc = 0.0
 best_model = copy.deepcopy(model.state_dict())
+
+train_loader, test_loader  = load_data(42, 0.1, '../dataset')
 
 for epoch in range(30):
 	model.train()
