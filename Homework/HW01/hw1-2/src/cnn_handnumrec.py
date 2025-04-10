@@ -6,9 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from load_dataset import train_loader, test_loader
 from cnn_builder import build_cnn
-
+from load_dataset import train_loader, test_loader
 
 # 初始化
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -38,7 +37,7 @@ for epoch in range(30):
 		optimizer.step()
 
 		train_loss += loss.item() * x.size(0)
-		train_correct += (output.argmax(1) == y).sum().item()
+		train_correct += torch.eq(output.argmax(1), y).sum().item()
 
 	train_loss /= len(train_loader.dataset)
 	train_acc = train_correct / len(train_loader.dataset)
@@ -53,7 +52,7 @@ for epoch in range(30):
 			output = model(x)
 			loss = criterion(output, y)
 			val_loss += loss.item() * x.size(0)
-			val_correct += (output.argmax(1) == y).sum().item()
+			val_correct += torch.eq(output.argmax(1), y).sum().item()
 
 	val_loss /= len(test_loader.dataset)
 	val_acc = val_correct / len(test_loader.dataset)
@@ -74,7 +73,7 @@ with torch.no_grad():
 	for x, y in test_loader:
 		x, y = x.to(device), y.to(device)
 		output = model(x)
-		test_correct += (output.argmax(1) == y).sum().item()
+		test_correct += torch.eq(output.argmax(1), y).sum().item()
 		predicts = output.argmax(1)
 
 		for i in range(len(y)):
@@ -84,7 +83,7 @@ with torch.no_grad():
 test_acc = test_correct / len(test_loader.dataset)
 print(f"Test Accuracy: {test_acc:.4f}")
 
-folder_path = 'dataset/errors'
+folder_path = '../dataset/errors'
 if os.path.exists(folder_path):
 	for filename in os.listdir(folder_path):
 		file_path = os.path.join(folder_path, filename)

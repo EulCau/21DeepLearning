@@ -14,19 +14,19 @@ transform = transforms.Compose([
 
 # 加载完整数据集
 train_dataset = datasets.MNIST(
-    root='./dataset',
+    root='../dataset',
     train=True, 
     download=True, 
     transform=transform
 )
 test_dataset = datasets.MNIST(
-    root='./dataset',
+    root='../dataset',
     train=False, 
     transform=transform
 )
 
 # 随机抽取1%数据
-def get_subset(dataset, ratio=0.1):
+def get_subset(dataset, ratio=0.01):
     indices = np.random.choice(
         len(dataset), 
         size=int(len(dataset)*ratio), 
@@ -38,7 +38,7 @@ train_subset = get_subset(train_dataset)
 test_subset = get_subset(test_dataset)
 
 # 创建DataLoader
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=16)
+train_loader = DataLoader(train_subset, batch_size=16, shuffle=True)
+test_loader = DataLoader(test_subset, batch_size=16)
 
-print(f"训练样本数: {len(train_dataset)}, 测试样本数: {len(test_dataset)}")
+print(f"训练样本数: {len(train_subset)}, 测试样本数: {len(test_subset)}")
