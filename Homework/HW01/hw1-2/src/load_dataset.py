@@ -1,6 +1,6 @@
 import torch
 from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, random_split
 import numpy as np
 
 
@@ -40,8 +40,17 @@ def load_data(seed=42, ratio=0.1, data_path='../dataset'):
 	train_subset = get_subset(train_dataset, ratio)
 	test_subset = get_subset(test_dataset, ratio)
 
+	val_size = len(train_subset) // 6
+	train_size = len(train_subset) - val_size
+
+	train_subset, val_subset = random_split(train_subset, [train_size, val_size])
+
 	train_loader = DataLoader(train_subset, batch_size=16, shuffle=True)
+	val_loader = DataLoader(val_subset, batch_size=16, shuffle=False)
 	test_loader = DataLoader(test_subset, batch_size=16)
 
-	print(f"训练样本数: {len(train_subset)}, 测试样本数: {len(test_subset)}")
-	return train_loader, test_loader
+	print(f"training set size: {len(train_subset)}, "
+		  f"validation set size: {len(val_subset)}, "
+		  f"test set size: {len(test_subset)}")
+
+	return train_loader, val_loader, test_loader
