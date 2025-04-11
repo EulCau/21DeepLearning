@@ -11,6 +11,19 @@ from load_dataset import load_data
 
 
 def train(train_loader, val_loader, model, criterion, optimizer):
+	"""
+	Train the CNN model using the given training and validation data loaders.
+
+	Args:
+		train_loader (DataLoader): DataLoader for training data.
+		val_loader (DataLoader): DataLoader for validation data.
+		model (nn.Module): The CNN model to train.
+		criterion: Loss function.
+		optimizer: Optimizer for training.
+
+	Returns:
+		dict: The state dictionary of the best-performing model on validation set.
+	"""
 	best_acc = 0.0
 	best_model = copy.deepcopy(model.state_dict())
 	device = next(model.parameters()).device
@@ -34,10 +47,10 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 		train_loss /= len(train_loader.dataset)
 		train_acc = train_correct / len(train_loader.dataset)
 
-		# 验证
 		model.eval()
 		val_loss = 0.0
 		val_correct = 0
+
 		with torch.no_grad():
 			for x, y in val_loader:
 				x, y = x.to(device), y.to(device)
@@ -61,12 +74,22 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 
 
 def test(test_loader, model, best_model, data_path):
+	"""
+	Evaluate the best model on the test dataset and save misclassified images.
+
+	Args:
+		test_loader (DataLoader): DataLoader for test data.
+		model (nn.Module): The CNN model.
+		best_model (dict): The best model state dictionary from training.
+		data_path (str): Path to the dataset for saving error images.
+	"""
 	model.load_state_dict(best_model)
 	model.eval()
 	errors = []
 	device = next(model.parameters()).device
 
 	test_correct = 0
+
 	with torch.no_grad():
 		for x, y in test_loader:
 			x, y = x.to(device), y.to(device)
@@ -80,11 +103,20 @@ def test(test_loader, model, best_model, data_path):
 
 	test_acc = test_correct / len(test_loader.dataset)
 	print(f"Test Accuracy: {test_acc:.4f}")
+
 	save_err_data(data_path, errors)
 
 
 def save_err_data(data_path, errors):
+	"""
+	Save images that were misclassified by the model.
+
+	Args:
+		data_path (str): Root path to the dataset.
+		errors (list): List of tuples (image tensor, true label, predicted label).
+	"""
 	err_path = os.path.join(data_path, 'errors')
+
 	if os.path.exists(err_path):
 		for filename in os.listdir(err_path):
 			file_path = os.path.join(err_path, filename)
@@ -103,26 +135,36 @@ def save_err_data(data_path, errors):
 
 
 def main():
+	"""
+	Main function to execute the training, validation, and testing pipeline.
+	"""
+	# Initializes model, data loaders, loss function, and optimizer.
 	seed = 42
 	data_path = '../dataset'
+
 	if torch.cuda.is_available():
 		device = torch.device('cuda')
 		ratio = 0.1
 	else:
 		device = torch.device('cpu')
 		ratio = 0.01
+
 	print(f"device: {device}")
 
+	# Build the CNN model
 	model = build_cnn(
-		1, [16, 32], 3,
+		1, [16, 32, 64], 3,
 		True, False, 'max', 10
 	).to(device)
 
+	# Loss and optimizer
 	criterion = nn.CrossEntropyLoss()
 	optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
+	# Load data
 	train_loader, val_loader, test_loader = load_data(seed, ratio, data_path)
 
+	# Train and evaluate
 	best_model = train(train_loader, val_loader, model, criterion, optimizer)
 	test(test_loader, model, best_model, data_path)
 
