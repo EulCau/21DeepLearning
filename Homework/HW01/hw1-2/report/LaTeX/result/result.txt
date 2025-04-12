@@ -1,0 +1,102 @@
+D:\CXTX_copy\08DeepLearning\Homework\.venv\Scripts\python.exe D:\CXTX_copy\08DeepLearning\Homework\HW01\hw1-2\src\cnn_handnumrec.py 
+device: cuda
+training set size: 5000, validation set size: 1000, test set size: 1000
+Epoch 01: Train Loss 0.3970, Acc 0.8792 | Val Loss 0.1304, Acc 0.9580
+Epoch 02: Train Loss 0.1096, Acc 0.9652 | Val Loss 0.1141, Acc 0.9580
+Epoch 03: Train Loss 0.0703, Acc 0.9760 | Val Loss 0.0814, Acc 0.9750
+Epoch 04: Train Loss 0.0447, Acc 0.9860 | Val Loss 0.0923, Acc 0.9750
+Epoch 05: Train Loss 0.0280, Acc 0.9910 | Val Loss 0.1847, Acc 0.9440
+Epoch 06: Train Loss 0.0231, Acc 0.9938 | Val Loss 0.0995, Acc 0.9770
+Epoch 07: Train Loss 0.0154, Acc 0.9950 | Val Loss 0.0965, Acc 0.9760
+Epoch 08: Train Loss 0.0114, Acc 0.9966 | Val Loss 0.0917, Acc 0.9770
+Epoch 09: Train Loss 0.0502, Acc 0.9816 | Val Loss 0.1014, Acc 0.9780
+Epoch 10: Train Loss 0.0152, Acc 0.9954 | Val Loss 0.0791, Acc 0.9840
+Epoch 11: Train Loss 0.0081, Acc 0.9978 | Val Loss 0.1145, Acc 0.9760
+Epoch 12: Train Loss 0.0023, Acc 0.9998 | Val Loss 0.0868, Acc 0.9840
+Epoch 13: Train Loss 0.0006, Acc 1.0000 | Val Loss 0.0870, Acc 0.9820
+Epoch 14: Train Loss 0.0003, Acc 1.0000 | Val Loss 0.0799, Acc 0.9840
+Epoch 15: Train Loss 0.0002, Acc 1.0000 | Val Loss 0.0783, Acc 0.9830
+Epoch 16: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0783, Acc 0.9850
+Epoch 17: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0783, Acc 0.9840
+Epoch 18: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0782, Acc 0.9820
+Epoch 19: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0764, Acc 0.9840
+Epoch 20: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0825, Acc 0.9840
+Epoch 21: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0810, Acc 0.9860
+Epoch 22: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0805, Acc 0.9850
+Epoch 23: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0803, Acc 0.9840
+Epoch 24: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0816, Acc 0.9870
+Epoch 25: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0842, Acc 0.9860
+Epoch 26: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0850, Acc 0.9850
+Epoch 27: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0851, Acc 0.9860
+Epoch 28: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0857, Acc 0.9870
+Epoch 29: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0877, Acc 0.9880
+Epoch 30: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0843, Acc 0.9840
+Test Accuracy: 0.9890
+device: cuda
+training set size: 5000, validation set size: 1000, test set size: 1000
+Epoch 01: Train Loss 0.3788, Acc 0.8862 | Val Loss 0.1527, Acc 0.9500
+Epoch 02: Train Loss 0.1171, Acc 0.9624 | Val Loss 0.1068, Acc 0.9670
+Epoch 03: Train Loss 0.0766, Acc 0.9760 | Val Loss 0.1002, Acc 0.9700
+Epoch 04: Train Loss 0.0534, Acc 0.9834 | Val Loss 0.1406, Acc 0.9630
+Epoch 05: Train Loss 0.0510, Acc 0.9824 | Val Loss 0.0883, Acc 0.9750
+Epoch 06: Train Loss 0.0226, Acc 0.9916 | Val Loss 0.0937, Acc 0.9760
+Epoch 07: Train Loss 0.0143, Acc 0.9960 | Val Loss 0.1185, Acc 0.9720
+Epoch 08: Train Loss 0.0212, Acc 0.9922 | Val Loss 0.0985, Acc 0.9720
+Epoch 09: Train Loss 0.0170, Acc 0.9948 | Val Loss 0.0817, Acc 0.9810
+Epoch 10: Train Loss 0.0240, Acc 0.9922 | Val Loss 0.1103, Acc 0.9680
+Epoch 11: Train Loss 0.0117, Acc 0.9964 | Val Loss 0.0834, Acc 0.9830
+Epoch 12: Train Loss 0.0016, Acc 0.9998 | Val Loss 0.0750, Acc 0.9840
+Epoch 13: Train Loss 0.0063, Acc 0.9982 | Val Loss 0.0779, Acc 0.9830
+Epoch 14: Train Loss 0.0346, Acc 0.9888 | Val Loss 0.1532, Acc 0.9610
+Epoch 15: Train Loss 0.0182, Acc 0.9940 | Val Loss 0.1365, Acc 0.9690
+Epoch 16: Train Loss 0.0178, Acc 0.9936 | Val Loss 0.1112, Acc 0.9760
+Epoch 17: Train Loss 0.0071, Acc 0.9978 | Val Loss 0.0971, Acc 0.9790
+Epoch 18: Train Loss 0.0085, Acc 0.9966 | Val Loss 0.1072, Acc 0.9780
+Epoch 19: Train Loss 0.0024, Acc 0.9994 | Val Loss 0.0945, Acc 0.9850
+Epoch 20: Train Loss 0.0009, Acc 1.0000 | Val Loss 0.0919, Acc 0.9860
+Epoch 21: Train Loss 0.0177, Acc 0.9944 | Val Loss 0.2393, Acc 0.9580
+Epoch 22: Train Loss 0.0264, Acc 0.9914 | Val Loss 0.0778, Acc 0.9810
+Epoch 23: Train Loss 0.0144, Acc 0.9954 | Val Loss 0.0945, Acc 0.9810
+Epoch 24: Train Loss 0.0029, Acc 0.9990 | Val Loss 0.0844, Acc 0.9840
+Epoch 25: Train Loss 0.0016, Acc 0.9992 | Val Loss 0.1008, Acc 0.9800
+Epoch 26: Train Loss 0.0015, Acc 0.9996 | Val Loss 0.0958, Acc 0.9800
+Epoch 27: Train Loss 0.0019, Acc 0.9998 | Val Loss 0.0827, Acc 0.9830
+Epoch 28: Train Loss 0.0002, Acc 1.0000 | Val Loss 0.0758, Acc 0.9820
+Epoch 29: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.0786, Acc 0.9840
+Epoch 30: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.0788, Acc 0.9840
+Test Accuracy: 0.9800
+device: cuda
+training set size: 5000, validation set size: 1000, test set size: 1000
+Epoch 01: Train Loss 0.3778, Acc 0.8830 | Val Loss 0.1529, Acc 0.9580
+Epoch 02: Train Loss 0.1268, Acc 0.9606 | Val Loss 0.1822, Acc 0.9460
+Epoch 03: Train Loss 0.0779, Acc 0.9756 | Val Loss 0.1166, Acc 0.9650
+Epoch 04: Train Loss 0.0620, Acc 0.9802 | Val Loss 0.1636, Acc 0.9570
+Epoch 05: Train Loss 0.0430, Acc 0.9856 | Val Loss 0.1216, Acc 0.9690
+Epoch 06: Train Loss 0.0277, Acc 0.9900 | Val Loss 0.1375, Acc 0.9650
+Epoch 07: Train Loss 0.0233, Acc 0.9932 | Val Loss 0.1675, Acc 0.9590
+Epoch 08: Train Loss 0.0132, Acc 0.9968 | Val Loss 0.1779, Acc 0.9570
+Epoch 09: Train Loss 0.0180, Acc 0.9942 | Val Loss 0.1458, Acc 0.9640
+Epoch 10: Train Loss 0.0319, Acc 0.9868 | Val Loss 0.1284, Acc 0.9730
+Epoch 11: Train Loss 0.0143, Acc 0.9960 | Val Loss 0.1569, Acc 0.9680
+Epoch 12: Train Loss 0.0314, Acc 0.9902 | Val Loss 0.1209, Acc 0.9670
+Epoch 13: Train Loss 0.0124, Acc 0.9954 | Val Loss 0.1390, Acc 0.9710
+Epoch 14: Train Loss 0.0142, Acc 0.9948 | Val Loss 0.1259, Acc 0.9720
+Epoch 15: Train Loss 0.0030, Acc 0.9990 | Val Loss 0.1318, Acc 0.9710
+Epoch 16: Train Loss 0.0004, Acc 1.0000 | Val Loss 0.1247, Acc 0.9750
+Epoch 17: Train Loss 0.0002, Acc 1.0000 | Val Loss 0.1277, Acc 0.9750
+Epoch 18: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.1300, Acc 0.9750
+Epoch 19: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.1293, Acc 0.9750
+Epoch 20: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.1324, Acc 0.9770
+Epoch 21: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.1339, Acc 0.9780
+Epoch 22: Train Loss 0.0001, Acc 1.0000 | Val Loss 0.1362, Acc 0.9760
+Epoch 23: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1349, Acc 0.9780
+Epoch 24: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1375, Acc 0.9770
+Epoch 25: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1373, Acc 0.9780
+Epoch 26: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1440, Acc 0.9760
+Epoch 27: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1416, Acc 0.9780
+Epoch 28: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1466, Acc 0.9770
+Epoch 29: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1452, Acc 0.9770
+Epoch 30: Train Loss 0.0000, Acc 1.0000 | Val Loss 0.1462, Acc 0.9770
+Test Accuracy: 0.9840
+
+进程已结束，退出代码为 0
