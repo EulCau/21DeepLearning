@@ -134,32 +134,32 @@ def save_err_data(data_path, errors):
 		plt.close()
 
 
-def main():
+def main(params):
 	"""
 	Main function to execute the training, validation, and testing pipeline.
 	"""
 	# Initializes model, data loaders, loss function, and optimizer.
-	seed = 42
+	seed = params['seed']
 	data_path = '../dataset'
 
 	if torch.cuda.is_available():
 		device = torch.device('cuda')
-		ratio = 0.1
+		ratio = params['ratio_cuda']
 	else:
 		device = torch.device('cpu')
-		ratio = 0.01
+		ratio = params['ratio_cpu']
 
 	print(f"device: {device}")
 
 	# Build the CNN model
 	model = build_cnn(
-		1, [16, 32, 64], 3,
-		True, False, 'max', 10
+		params['input_channels'], params['conv_channels'], params['kernel_size'],
+		params['use_batch_norm'], params['use_dropout'], params['pooling']
 	).to(device)
 
 	# Loss and optimizer
 	criterion = nn.CrossEntropyLoss()
-	optimizer = optim.Adam(model.parameters(), lr=1e-3)
+	optimizer = optim.Adam(model.parameters(), params['lr'])
 
 	# Load data
 	train_loader, val_loader, test_loader = load_data(seed, ratio, data_path)
@@ -170,4 +170,16 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	params_ = {
+		'seed': 42,
+		'ratio_cuda': 0.1,
+		'ratio_cpu': 0.01,
+		'input_channels': 1,
+		'conv_channels': [16, 32],
+		'kernel_size': 3,
+		'use_batch_norm': True,
+		'use_dropout': False,
+		'pooling': 'max',
+		'lr': 1e-3
+	}
+	main(params_)

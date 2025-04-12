@@ -15,8 +15,8 @@ class AutoCNN(nn.Module):
 		num_classes (int): Number of output classes.
 	"""
 	def __init__(
-		self, input_channels, conv_channels, kernel_size,
-		use_batch_norm, use_dropout, pooling, num_classes
+		self, input_channels, conv_channels,
+		kernel_size, use_batch_norm, use_dropout, pooling
 	):
 		super(AutoCNN, self).__init__()
 
@@ -66,7 +66,7 @@ class AutoCNN(nn.Module):
 			nn.Linear(fc_input_dim, 128),
 			nn.ReLU(),
 			nn.Dropout(0.5) if use_dropout else nn.Identity(),
-			nn.Linear(128, num_classes)
+			nn.Linear(128, 10)
 		)
 
 	def forward(self, x):
@@ -90,8 +90,7 @@ def build_cnn(
 		kernel_size=3,
 		use_batch_norm=True,
 		use_dropout=False,
-		pooling='max',
-		num_classes=10
+		pooling='max'
 ):
 	"""
 	Builds an AutoCNN instance with the given configuration.
@@ -117,6 +116,5 @@ def build_cnn(
 		kernel_size=kernel_size,
 		use_batch_norm=use_batch_norm,
 		use_dropout=use_dropout,
-		pooling=pooling,
-		num_classes=num_classes
+		pooling=pooling
 	)
