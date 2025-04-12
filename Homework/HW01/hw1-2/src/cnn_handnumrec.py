@@ -2,6 +2,7 @@ import copy
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -10,7 +11,7 @@ from cnn_builder import build_cnn
 from load_dataset import load_data
 
 
-def train(train_loader, val_loader, model, criterion, optimizer):
+def train(train_loader, val_loader, model, criterion, optimizer, epochs):
 	"""
 	Train the CNN model using the given training and validation data loaders.
 
@@ -20,6 +21,7 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 		model (nn.Module): The CNN model to train.
 		criterion: Loss function.
 		optimizer: Optimizer for training.
+		epochs: number of epoch.
 
 	Returns:
 		dict: The state dictionary of the best-performing model on validation set.
@@ -27,8 +29,9 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 	best_acc = 0.0
 	best_model = copy.deepcopy(model.state_dict())
 	device = next(model.parameters()).device
+	vals_acc = np.zeros(epochs)
 
-	for epoch in range(30):
+	for epoch in range(epochs):
 		model.train()
 		train_loss = 0.0
 		train_correct = 0
@@ -61,6 +64,7 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 
 		val_loss /= len(val_loader.dataset)
 		val_acc = val_correct / len(val_loader.dataset)
+		vals_acc[epoch] = val_acc
 
 		print(
 			f"Epoch {(epoch + 1):02d}: Train Loss {train_loss:.4f}, Acc {train_acc:.4f} | "
@@ -70,10 +74,24 @@ def train(train_loader, val_loader, model, criterion, optimizer):
 			best_acc = val_acc
 			best_model = copy.deepcopy(model.state_dict())
 
-	return best_model
+	return best_model, vals_acc
 
 
-def test(test_loader, model, best_model, data_path):
+def plot_results(vals_accuracies, pars):
+	for i in range(min(len(vals_accuracies),len(pars))):
+		vals_acc = vals_accuracies[i]
+		params = pars[i]
+		label = f"{params['pooling']} pooling and {len(params['conv_channels'])} convolution channels"
+		plt.plot(vals_acc, label=label)
+
+	plt.xlabel('Epochs')
+	plt.ylabel('accuracy of validations')
+	plt.title('validations\' accuracy of different params')
+	plt.legend()
+	plt.show()
+
+
+def test(test_loader, model, best_model, err_path):
 	"""
 	Evaluate the best model on the test dataset and save misclassified images.
 
@@ -81,7 +99,7 @@ def test(test_loader, model, best_model, data_path):
 		test_loader (DataLoader): DataLoader for test data.
 		model (nn.Module): The CNN model.
 		best_model (dict): The best model state dictionary from training.
-		data_path (str): Path to the dataset for saving error images.
+		err_path (str): Path to the error folder for saving error images.
 	"""
 	model.load_state_dict(best_model)
 	model.eval()
@@ -104,19 +122,17 @@ def test(test_loader, model, best_model, data_path):
 	test_acc = test_correct / len(test_loader.dataset)
 	print(f"Test Accuracy: {test_acc:.4f}")
 
-	save_err_data(data_path, errors)
+	save_err_data(err_path, errors)
 
 
-def save_err_data(data_path, errors):
+def save_err_data(err_path, errors):
 	"""
 	Save images that were misclassified by the model.
 
 	Args:
-		data_path (str): Root path to the dataset.
+		err_path (str): Path to the error folder.
 		errors (list): List of tuples (image tensor, true label, predicted label).
 	"""
-	err_path = os.path.join(data_path, 'errors')
-
 	if os.path.exists(err_path):
 		for filename in os.listdir(err_path):
 			file_path = os.path.join(err_path, filename)
@@ -141,6 +157,7 @@ def main(params):
 	# Initializes model, data loaders, loss function, and optimizer.
 	seed = params['seed']
 	data_path = '../dataset'
+	err_path = os.path.join(data_path, f"{params['pooling']}_{len(params['conv_channels'])}_conv_channels")
 
 	if torch.cuda.is_available():
 		device = torch.device('cuda')
@@ -165,8 +182,10 @@ def main(params):
 	train_loader, val_loader, test_loader = load_data(seed, ratio, data_path)
 
 	# Train and evaluate
-	best_model = train(train_loader, val_loader, model, criterion, optimizer)
-	test(test_loader, model, best_model, data_path)
+	best_model, vals_acc = train(train_loader, val_loader, model, criterion, optimizer, params['epochs'])
+	test(test_loader, model, best_model, err_path)
+
+	return  vals_acc
 
 
 if __name__ == '__main__':
@@ -180,6 +199,19 @@ if __name__ == '__main__':
 		'use_batch_norm': True,
 		'use_dropout': False,
 		'pooling': 'max',
-		'lr': 1e-3
+		'lr': 1e-3,
+		'epochs': 30
 	}
-	main(params_)
+
+	params_s = [params_]
+	accuracies = [main(params_)]
+
+	params_s.append(copy.deepcopy(params_))
+	params_s[-1]['pooling'] = 'avg'
+	accuracies.append(main(params_))
+
+	params_s.append(copy.deepcopy(params_))
+	params_s[-1]['conv_channels'] = [16, 32, 64]
+	accuracies.append(main(params_))
+
+	plot_results(accuracies, params_s)
