@@ -24,11 +24,12 @@ def train(train_loader, val_loader, model, criterion, optimizer, epochs):
 		epochs: number of epoch.
 
 	Returns:
-		dict: The state dictionary of the best-performing model on validation set.
+		dict: The state dictionary of the best-performing model on validation set and the validation losses.
 	"""
 	best_acc = 0.0
 	best_model = copy.deepcopy(model.state_dict())
 	device = next(model.parameters()).device
+	vals_loss = np.zeros(epochs)
 	vals_acc = np.zeros(epochs)
 
 	for epoch in range(epochs):
@@ -64,6 +65,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, epochs):
 
 		val_loss /= len(val_loader.dataset)
 		val_acc = val_correct / len(val_loader.dataset)
+		vals_loss[epoch] = val_loss
 		vals_acc[epoch] = val_acc
 
 		print(
@@ -74,11 +76,23 @@ def train(train_loader, val_loader, model, criterion, optimizer, epochs):
 			best_acc = val_acc
 			best_model = copy.deepcopy(model.state_dict())
 
-	return best_model, vals_acc
+	return best_model, vals_loss, vals_acc
 
 
-def plot_results(vals_accuracies, pars):
-	for i in range(min(len(vals_accuracies),len(pars))):
+def plot_results(vals_losses, vals_accuracies, pars):
+	for i in range(min(len(vals_losses), len(pars))):
+		vals_loss = vals_losses[i]
+		params = pars[i]
+		label = f"{params['pooling']} pooling and {len(params['conv_channels'])} convolution channels"
+		plt.plot(vals_loss, label=label)
+
+	plt.xlabel('Epochs')
+	plt.ylabel('loss of validations')
+	plt.title('validations\' losses of different params')
+	plt.legend()
+	plt.show()
+
+	for i in range(min(len(vals_losses), len(pars))):
 		vals_acc = vals_accuracies[i]
 		params = pars[i]
 		label = f"{params['pooling']} pooling and {len(params['conv_channels'])} convolution channels"
@@ -86,7 +100,7 @@ def plot_results(vals_accuracies, pars):
 
 	plt.xlabel('Epochs')
 	plt.ylabel('accuracy of validations')
-	plt.title('validations\' accuracy of different params')
+	plt.title('validations\' accuracies of different params')
 	plt.legend()
 	plt.show()
 
@@ -157,7 +171,7 @@ def main(params):
 	# Initializes model, data loaders, loss function, and optimizer.
 	seed = params['seed']
 	data_path = '../dataset'
-	err_path = os.path.join(data_path, f"{params['pooling']}_{len(params['conv_channels'])}_conv_channels")
+	err_path = os.path.join(data_path, f"errors/{params['pooling']}_{len(params['conv_channels'])}_conv_channels")
 
 	if torch.cuda.is_available():
 		device = torch.device('cuda')
@@ -182,16 +196,23 @@ def main(params):
 	train_loader, val_loader, test_loader = load_data(seed, ratio, data_path)
 
 	# Train and evaluate
-	best_model, vals_acc = train(train_loader, val_loader, model, criterion, optimizer, params['epochs'])
+	best_model, vals_loss, vals_acc = train(train_loader, val_loader, model, criterion, optimizer, params['epochs'])
 	test(test_loader, model, best_model, err_path)
 
-	return  vals_acc
+	# save model
+	model_path = 'best_model'
+	model_name = f"polling_{params['pooling']}_conv_{len(params['conv_channels'])}.pth"
+	if not os.path.exists(model_path):
+		os.makedirs(model_path)
+	torch.save(model.state_dict(), os.path.join(model_path, model_name))
+
+	return  vals_loss, vals_acc
 
 
 if __name__ == '__main__':
 	params_ = {
 		'seed': 42,
-		'ratio_cuda': 0.1,
+		'ratio_cuda': 1, # 助教检查可改为 0.1
 		'ratio_cpu': 0.01,
 		'input_channels': 1,
 		'conv_channels': [16, 32],
@@ -199,19 +220,36 @@ if __name__ == '__main__':
 		'use_batch_norm': True,
 		'use_dropout': False,
 		'pooling': 'max',
-		'lr': 1e-3,
+		'lr': 1e-4,
 		'epochs': 30
 	}
 
-	params_s = [params_]
-	accuracies = [main(params_)]
+	params_s: list[dict] = []
+	losses:list[np.ndarray] = []
+	accuracies:list[np.ndarray] = []
+
+	params_s.append(copy.deepcopy(params_))
+	loss_, acc = main(params_s[-1])
+	losses.append(loss_)
+	accuracies.append(acc)
 
 	params_s.append(copy.deepcopy(params_))
 	params_s[-1]['pooling'] = 'avg'
-	accuracies.append(main(params_))
+	loss_, acc = main(params_s[-1])
+	losses.append(loss_)
+	accuracies.append(acc)
 
 	params_s.append(copy.deepcopy(params_))
 	params_s[-1]['conv_channels'] = [16, 32, 64]
-	accuracies.append(main(params_))
+	loss_, acc = main(params_s[-1])
+	losses.append(loss_)
+	accuracies.append(acc)
 
-	plot_results(accuracies, params_s)
+	params_s.append(copy.deepcopy(params_))
+	params_s[-1]['pooling'] = 'avg'
+	params_s[-1]['conv_channels'] = [16, 32, 64]
+	loss_, acc = main(params_s[-1])
+	losses.append(loss_)
+	accuracies.append(acc)
+
+	plot_results(losses, accuracies, params_s)

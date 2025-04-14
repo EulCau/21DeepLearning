@@ -12,7 +12,6 @@ class AutoCNN(nn.Module):
 		use_batch_norm (bool): Whether to apply Batch Normalization after each conv layer.
 		use_dropout (bool): Whether to apply Dropout after pooling layers and before final linear layer.
 		pooling (str): Type of pooling layer to use ('max' or 'avg').
-		num_classes (int): Number of output classes.
 	"""
 	def __init__(
 		self, input_channels, conv_channels,
@@ -102,7 +101,6 @@ def build_cnn(
 		use_batch_norm (bool): Whether to use Batch Normalization.
 		use_dropout (bool): Whether to use Dropout.
 		pooling (str): Type of pooling to use ('max' or 'avg').
-		num_classes (int): Number of output classes.
 
 	Returns:
 		AutoCNN: Instantiated CNN model.
