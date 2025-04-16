@@ -13,11 +13,11 @@ from load_dataset import load_data
 
 def train(train_loader, val_loader, model, criterion, optimizer, epochs):
 	"""
-	Train the CNN model using the given training and validation data loaders.
+	Train the CNN model using the given training and validation dataset loaders.
 
 	Args:
-		train_loader (DataLoader): DataLoader for training data.
-		val_loader (DataLoader): DataLoader for validation data.
+		train_loader (DataLoader): DataLoader for training dataset.
+		val_loader (DataLoader): DataLoader for validation dataset.
 		model (nn.Module): The CNN model to train.
 		criterion: Loss function.
 		optimizer: Optimizer for training.
@@ -110,7 +110,7 @@ def test(test_loader, model, best_model, err_path):
 	Evaluate the best model on the test dataset and save misclassified images.
 
 	Args:
-		test_loader (DataLoader): DataLoader for test data.
+		test_loader (DataLoader): DataLoader for test dataset.
 		model (nn.Module): The CNN model.
 		best_model (dict): The best model state dictionary from training.
 		err_path (str): Path to the error folder for saving error images.
@@ -168,7 +168,7 @@ def main(params):
 	"""
 	Main function to execute the training, validation, and testing pipeline.
 	"""
-	# Initializes model, data loaders, loss function, and optimizer.
+	# Initializes model, dataset loaders, loss function, and optimizer.
 	seed = params['seed']
 	data_path = '../dataset'
 	err_path = os.path.join(data_path, f"errors/{params['pooling']}_{len(params['conv_channels'])}_conv_channels")
@@ -192,7 +192,7 @@ def main(params):
 	criterion = nn.CrossEntropyLoss()
 	optimizer = optim.Adam(model.parameters(), params['lr'])
 
-	# Load data
+	# Load dataset
 	train_loader, val_loader, test_loader = load_data(seed, ratio, data_path)
 
 	# Train and evaluate

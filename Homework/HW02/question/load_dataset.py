@@ -14,13 +14,13 @@ transform = transforms.Compose([
 
 # 加载完整数据集
 train_dataset = datasets.MNIST(
-    root='./data', 
+    root='./dataset',
     train=True, 
     download=True, 
     transform=transform
 )
 test_dataset = datasets.MNIST(
-    root='./data', 
+    root='./dataset',
     train=False, 
     transform=transform
 )
