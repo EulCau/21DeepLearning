@@ -1,8 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from torch.utils.data import Dataset, DataLoader, random_split
+from tqdm import tqdm
 
 
 # -------------------------
@@ -10,47 +12,58 @@ from torch.utils.data import Dataset, DataLoader, random_split
 # -------------------------
 class Vocab:
 	def __init__(self, tokens, max_size=100000, min_freq=1):
-		# count frequencies
+		"""
+		Build vocabulary from tokens, keeping those with frequency >= min_freq
+		"""
 		freq = {}
 		for t in tokens:
 			freq[t] = freq.get(t, 0) + 1
-		# keep those above min_freq
+
+		# filter and sort by frequency
 		items = [t for t, c in freq.items() if c >= min_freq]
-		# sort by freq
 		items.sort(key=lambda token: -freq[token])
-		# limit size
-		items = items[: max_size]
-		# add special tokens
-		self.unk, self.pad = '<unk>', '<pad>'
+		items = items[:max_size]
+
+		# special tokens
+		self.pad, self.unk = '<pad>', '<unk>'
 		self.i2s = [self.pad, self.unk] + items
 		self.s2i = {t: i for i, t in enumerate(self.i2s)}
 
 	def encode(self, tokens, max_len=200):
-		# map tokens to ids, pad/truncate
+		"""
+		Convert list of tokens to list of IDs with left-padding
+		"""
 		ids = [self.s2i.get(t, self.s2i[self.unk]) for t in tokens[:max_len]]
 		if len(ids) < max_len:
-			ids = [self.s2i[self.pad]] * (max_len - len(ids)) + ids  # left-pad
+			# left-pad with pad token
+			pad_count = max_len - len(ids)
+			ids = [self.s2i[self.pad]] * pad_count + ids
 		return ids
 
 
 # -------------------------
-# 2. Dataset
+# 2. Dataset Definition
 # -------------------------
 class TextDataset(Dataset):
 	def __init__(self, texts, labels, vocab, max_len=200):
 		self.vocab = vocab
 		self.max_len = max_len
-		self.texts = [vocab.encode(t.lower().split(), max_len) for t in texts]
-		self.labels = (labels == 1).astype(np.float32)  # ensure binary float labels
 
-	def __len__(self): return len(self.labels)
+		# encode texts and prepare binary labels
+		self.texts = [vocab.encode(t.lower().split(), max_len) for t in texts]
+		self.labels = np.array(labels, dtype=np.float32)
+
+	def __len__(self):
+		return len(self.labels)
 
 	def __getitem__(self, idx):
-		return torch.tensor(self.texts[idx], dtype=torch.long), torch.tensor(self.labels[idx], dtype=torch.float)
+		x = torch.tensor(self.texts[idx], dtype=torch.long)
+		y = torch.tensor(self.labels[idx], dtype=torch.float)
+		return x, y
 
 
 # -------------------------
-# 3. Positional Encoding
+# 3. Positional Encoding Layer
 # -------------------------
 class PositionalEncoding(nn.Module):
 	def __init__(self, d_model, max_len=200):
@@ -63,12 +76,12 @@ class PositionalEncoding(nn.Module):
 		self.pe = pe.unsqueeze(0)  # shape (1, max_len, d_model)
 
 	def forward(self, x):
-		x = x + self.pe[:, -x.size(1):, :].to(x.device)
-		return x
+		# add positional encoding to embeddings
+		return x + self.pe[:, -x.size(1):, :].to(x.device)
 
 
 # -------------------------
-# 4. Attention-based Model
+# 4. Attention-based Classifier
 # -------------------------
 class AttentionClassifier(nn.Module):
 	def __init__(self, vocab_size, d_model=128, n_head=4, max_len=200):
@@ -81,26 +94,33 @@ class AttentionClassifier(nn.Module):
 		self.classifier = nn.Linear(d_model, 1)
 
 	def forward(self, x):
-		# x: (batch, seq)
+		# input x: (batch, seq_len)
 		x = self.embed(x)
 		x = self.pos_enc(x)
 
-		# self-attention (query,key,value all x)
-		mask = torch.triu(torch.ones(x.size(1), x.size(1)), diagonal=1).to(x.device).bool()
+		# causal mask to prevent attending to future tokens
+		seq_len = x.size(1)
+		mask = torch.triu(torch.ones(seq_len, seq_len, dtype=torch.bool, device=x.device), diagonal=1)
+
 		attn_out, _ = self.attn(x, x, x, attn_mask=mask)
-		# take last token's representation
-		last = attn_out[:, -1, :]
-		return self.classifier(last).squeeze(-1)
+		attn_out = self.norm(attn_out)
+
+		# use representation of last token for classification
+		last_repr = attn_out[:, -1, :]
+		logits = self.classifier(self.dropout(last_repr)).squeeze(-1)
+		return logits
 
 
 # -------------------------
-# 5. RNN-based Model
+# 5. RNN-based Classifier
 # -------------------------
 class RNNClassifier(nn.Module):
-	def __init__(self, vocab_size, emb_dim=128, hidden_dim=128, num_layers=1, rnn_type='rnn'):
+	def __init__(self, vocab_size, emb_dim=128, hidden_dim=128, num_layers=1, rnn_type='gru'):
 		super().__init__()
 		self.embed = nn.Embedding(vocab_size, emb_dim)
 		self.rnn_type = rnn_type
+
+		# choose RNN variant
 		if rnn_type == 'rnn':
 			self.rnn = nn.RNN(emb_dim, hidden_dim, num_layers, batch_first=True)
 		elif rnn_type == 'lstm':
@@ -109,30 +129,100 @@ class RNNClassifier(nn.Module):
 			self.rnn = nn.GRU(emb_dim, hidden_dim, num_layers, batch_first=True)
 		else:
 			raise ValueError("rnn_type must be 'rnn', 'lstm', or 'gru'")
+
 		self.classifier = nn.Linear(hidden_dim, 1)
 
 	def forward(self, x):
 		x = self.embed(x)
 		out, hn = self.rnn(x)
-		# 处理LSTM的输出（hn为元组）
-		if isinstance(hn, tuple): hn = hn[0]
-		last = hn[-1]  # 取最后一层的隐藏状态
-		return self.classifier(last).squeeze(-1)
+
+		# handle LSTM hidden state tuple
+		if isinstance(hn, tuple):
+			hn = hn[0]
+
+		# take last layer's hidden state
+		last_hidden = hn[-1]
+		logits = self.classifier(last_hidden).squeeze(-1)
+		return logits
 
 
 # -------------------------
-# 6. Training and Evaluation Utilities
+# 6. Training and Evaluation
 # -------------------------
+def train_epoch(model, loader, optimizer, criterion, device):
+	"""
+	Train for one epoch, with tqdm progress bar.
+	"""
+	model.train()
+	total_loss = 0.0
+
+	# wrap loader with tqdm for progress visualization
+	for x_batch, y_batch in tqdm(loader, desc='Batch', leave=False):
+		x_batch, y_batch = x_batch.to(device), y_batch.to(device)
+		optimizer.zero_grad()
+		logits = model(x_batch)
+		loss = criterion(logits, y_batch)
+		loss.backward()
+		optimizer.step()
+		total_loss += loss.item() * x_batch.size(0)
+
+	avg_loss = total_loss / len(loader.dataset)
+	return avg_loss
+
+
+def eval_model(model, loader, device):
+	model.eval()
+	preds, trues = [], []
+
+	with torch.no_grad():
+		for x_batch, y_batch in loader:
+			x_batch = x_batch.to(device)
+			logits = model(x_batch)
+			pred = (torch.sigmoid(logits) > 0.5).cpu().numpy()
+			preds.extend(pred)
+			trues.extend(y_batch.numpy())
+
+	# compute metrics
+	return {
+		'accuracy': accuracy_score(trues, preds),
+		'precision': precision_score(trues, preds, zero_division=0),
+		'recall': recall_score(trues, preds, zero_division=0),
+		'f1': f1_score(trues, preds, zero_division=0)
+	}
+
 
 def train_model(model, train_loader, val_loader, optimizer, criterion, device, epochs=10, patience=3):
+	"""
+	Train model with early stopping and record training history.
+	Returns history dict containing loss and metrics per epoch.
+	"""
 	best_val_loss = float('inf')
 	epochs_no_improve = 0
-	for epoch in range(epochs):
-		train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
-		val_metrics = eval_model(model, val_loader, device)
-		val_loss = 1 - val_metrics['accuracy']
-		print(f'Epoch {epoch}: loss={train_loss:.4f}, val_acc={val_metrics['accuracy']:.4f}, f1={val_metrics['f1']:.4f}')
 
+	history = {
+		'train_loss': [],
+		'val_loss': [],
+		'val_accuracy': [],
+		'val_f1': []
+	}
+
+	for epoch in range(1, epochs + 1):
+		# training step
+		train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
+
+		# validation step
+		val_metrics = eval_model(model, val_loader, device)
+		val_loss = 1.0 - val_metrics['accuracy']  # proxy for loss
+
+		# record history
+		history['train_loss'].append(train_loss)
+		history['val_loss'].append(val_loss)
+		history['val_accuracy'].append(val_metrics['accuracy'])
+		history['val_f1'].append(val_metrics['f1'])
+
+		print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_acc={val_metrics['accuracy']:.4f}, val_f1={val_metrics['f1']:.4f}")
+
+		# early stopping
 		if val_loss < best_val_loss:
 			best_val_loss = val_loss
 			epochs_no_improve = 0
@@ -142,85 +232,93 @@ def train_model(model, train_loader, val_loader, optimizer, criterion, device, e
 			if epochs_no_improve >= patience:
 				print(f"Early stopping at epoch {epoch}")
 				break
-	# 输出训练日志...
 
+	return history
 
-def train_epoch(model, loader, optimizer, criterion, device):
-	model.train()
-	total_loss = 0
-	for x, y in loader:
-		x, y = x.to(device), y.to(device)
-		optimizer.zero_grad()
-		logits = model(x)
-		loss = criterion(logits, y)
-		loss.backward()
-		optimizer.step()
-		total_loss += loss.item() * x.size(0)
-	return total_loss / len(loader.dataset)
-
-
-def eval_model(model, loader, device):
-	model.eval()
-	preds, trues = [], []
-	with torch.no_grad():
-		for x, y in loader:
-			x = x.to(device)
-			logits = model(x)
-			pred = (torch.sigmoid(logits) > 0.5).cpu().numpy()
-			preds.extend(pred)
-			trues.extend(y.numpy())
-	# compute metrics
-	return {
-		'accuracy': accuracy_score(trues, preds),
-		'precision': precision_score(trues, preds, zero_division=0),
-		'recall': recall_score(trues, preds, zero_division=0),
-		'f1': f1_score(trues, preds, zero_division=0)
-	}
 
 # -------------------------
-# 7. Putting It All Together
+# 7. Plotting Utilities
+# -------------------------
+def plot_training_history(history):
+	"""
+	Plot train/validation loss, accuracy and F1 over epochs.
+	"""
+	epochs = range(1, len(history['train_loss']) + 1)
+
+	# Loss plot
+	plt.figure()
+	plt.plot(epochs, history['train_loss'], label='Train Loss')
+	plt.plot(epochs, history['val_loss'], label='Val Loss')
+	plt.title('Loss over Epochs')
+	plt.xlabel('Epoch')
+	plt.ylabel('Loss')
+	plt.legend()
+	plt.show()
+
+	# Accuracy plot
+	plt.figure()
+	plt.plot(epochs, history['val_accuracy'], label='Val Accuracy')
+	plt.title('Validation Accuracy over Epochs')
+	plt.xlabel('Epoch')
+	plt.ylabel('Accuracy')
+	plt.show()
+
+	# F1 score plot
+	plt.figure()
+	plt.plot(epochs, history['val_f1'], label='Val F1 Score')
+	plt.title('Validation F1 Score over Epochs')
+	plt.xlabel('Epoch')
+	plt.ylabel('F1 Score')
+	plt.show()
+
+
+# -------------------------
+# 8. Main Execution
 # -------------------------
 def main():
+	# load DataFrame df with columns ['text', 'label']
 	from load_dataset import df
 
-	# build vocabulary
+	# prepare vocabulary
 	tokens = [t.lower() for text in df['text'] for t in text.split()]
 	vocab = Vocab(tokens, max_size=50000, min_freq=2)
 
-	# split data
-	texts = df['text'].values
-	labels = df['label'].values
-	labels = (labels == 1).astype(np.float32)
+	# prepare dataset and splits
+	texts, labels = df['text'].values, df['label'].values
 	dataset = TextDataset(texts, labels, vocab, max_len=200)
 	n = len(dataset)
-	train_len = int(0.8 * n)
-	val_len = int(0.1 * n)
-	test_len = n - train_len - val_len
-	train_ds, val_ds, test_ds = random_split(dataset, [train_len, val_len, test_len])
+
+	train_size = int(0.8 * n)
+	val_size = int(0.1 * n)
+	test_size = n - train_size - val_size
+	train_ds, val_ds, test_ds = random_split(dataset, [train_size, val_size, test_size])
+
 	train_loader = DataLoader(train_ds, batch_size=64, shuffle=True)
 	val_loader = DataLoader(val_ds, batch_size=64)
 	test_loader = DataLoader(test_ds, batch_size=64)
 
+	# device configuration
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 	# instantiate models
 	attn_model = AttentionClassifier(len(vocab.i2s)).to(device)
-	rnn_model = RNNClassifier(len(vocab.i2s)).to(device)
+	rnn_model = RNNClassifier(len(vocab.i2s), rnn_type='gru').to(device)
 
-	# criterion and optimizers
+	# loss and optimizers
 	criterion = nn.BCEWithLogitsLoss()
 	attn_opt = torch.optim.Adam(attn_model.parameters(), lr=1e-3)
 	rnn_opt = torch.optim.Adam(rnn_model.parameters(), lr=1e-3)
 
-	epochs = 10
-
-	# train attention model
+	# train and record history
 	print('Training Attention model...')
-	train_model(attn_model, train_loader, val_loader, attn_opt, criterion, device, epochs)
+	attn_history = train_model(attn_model, train_loader, val_loader, attn_opt, criterion, device,
+								epochs=10, patience=3)
+	plot_training_history(attn_history)
 
-	# train RNN model
 	print('Training RNN model...')
-	train_model(rnn_model, train_loader, val_loader, rnn_opt, criterion, device, epochs)
+	rnn_history = train_model(rnn_model, train_loader, val_loader, rnn_opt, criterion, device,
+							   epochs=10, patience=3)
+	plot_training_history(rnn_history)
 
 	# final evaluation on test set
 	print('Test Attention:', eval_model(attn_model, test_loader, device))
