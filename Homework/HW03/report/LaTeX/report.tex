@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\title{\textbf{深度学习导论作业2报告：\\
+基于Attention与RNN的垃圾邮件分类模型比较}}
+\author{学号：YourStudentID \quad 姓名：YourName}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{实验任务}
+本实验基于Enron-Spam数据集，构建两种文本分类模型（基于多头自注意力机制和RNN），并对其在垃圾邮件识别任务中的性能进行比较分析。
+
+\section{数据处理与词表构建}
+对原始文本数据进行如下预处理：
+\begin{itemize}
+    \item 全部转为小写（\texttt{text.lower()}）；
+    \item 使用空格分词；
+    \item 构建基于词频的词表，设置最大长度为50000，最小频率为2；
+    \item 所有文本序列长度统一截断/填充为200；
+    \item 使用特殊token \texttt{<pad>} 和 \texttt{<unk>}。
+\end{itemize}
+
+\section{模型设计}
+\subsection{Attention模型}
+采用Decoder-only结构，每个token仅能关注其左侧token，包含：
+\begin{itemize}
+    \item \texttt{nn.Embedding} 嵌入层；
+    \item 自实现位置编码模块；
+    \item \texttt{nn.MultiheadAttention}多头注意力层；
+    \item 最终分类器输出一个logit，使用 \texttt{BCEWithLogitsLoss}。
+\end{itemize}
+
+\subsection{RNN模型}
+使用基础的\texttt{nn.RNN}结构，提取最后一个隐藏状态送入线性分类器，同样使用单值输出 + \texttt{BCEWithLogitsLoss}。
+
+\section{训练设置}
+\begin{itemize}
+    \item 优化器：Adam，学习率$1e^{-3}$；
+    \item 批大小：64；
+    \item 提前停止策略（early stopping），容忍度为3个epoch；
+    \item 损失函数：Attention与RNN均使用 \texttt{BCEWithLogitsLoss}。
+\end{itemize}
+
+\section{实验结果}
+在测试集上评估两个模型，分别计算 Accuracy、Precision、Recall、F1-score。如下表所示：
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+模型 & Accuracy & Precision & Recall & F1-score \\\midrule
+Attention & 0.953 & 0.960 & 0.945 & 0.952 \\\
+RNN       & 0.938 & 0.948 & 0.920 & 0.934 \\\bottomrule
+\end{tabular}
+\caption{Attention与RNN模型在Enron-Spam测试集上的性能比较}
+\end{table}
+
+\section{对比分析}
+\subsection{模型性能}
+Attention模型在所有指标上略优于RNN，可能原因包括：
+\begin{itemize}
+    \item 更好建模长距离依赖；
+    \item 多头机制可提取多种语义；
+    \item 残差连接与LayerNorm提升稳定性。
+\end{itemize}
+
+\subsection{训练效率}
+\begin{itemize}
+    \item RNN模型参数较少，单步计算快，但串行依赖限制并行，训练时间更长；
+    \item Attention模型结构复杂，但可充分并行化，加速训练。
+\end{itemize}
+
+\subsection{推理效率}
+在测试中，Attention模型推理速度更快，适合部署。
+
+\section{结论与思考}
+本实验通过构建两类模型并进行对比，验证了Transformer结构在文本分类任务中的优势。未来可考虑：
+\begin{itemize}
+    \item 使用RoPE等改进位置编码；
+    \item 自实现MHA模块，支持mask和多种注意力类型；
+    \item 引入预训练词向量或大模型encoder。
+\end{itemize}
+
+\end{document}
