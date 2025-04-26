@@ -77,7 +77,8 @@ class PositionalEncoding(nn.Module):
 
 	def forward(self, x):
 		# add positional encoding to embeddings
-		return x + self.pe[:, -x.size(1):, :].to(x.device)
+		x = x + self.pe[:, -x.size(1):, :].to(x.device)
+		return x
 
 
 # -------------------------
@@ -100,7 +101,10 @@ class AttentionClassifier(nn.Module):
 
 		# causal mask to prevent attending to future tokens
 		seq_len = x.size(1)
-		mask = torch.triu(torch.ones(seq_len, seq_len, dtype=torch.bool, device=x.device), diagonal=1)
+		mask = torch.triu(
+			torch.ones(seq_len, seq_len, dtype=torch.bool, device=x.device) * float('-inf'),
+			diagonal=1
+		)
 
 		attn_out, _ = self.attn(x, x, x, attn_mask=mask)
 		attn_out = self.norm(attn_out)
@@ -149,6 +153,51 @@ class RNNClassifier(nn.Module):
 # -------------------------
 # 6. Training and Evaluation
 # -------------------------
+def train_model(model, train_loader, val_loader, optimizer, criterion, device, epochs=10, patience=3):
+	"""
+	Train model with early stopping and record training history.
+	Returns history dict containing loss and metrics per epoch.
+	"""
+	best_val_loss = float('inf')
+	epochs_no_improve = 0
+
+	history = {
+		'train_loss': [],
+		'val_loss': [],
+		'val_accuracy': [],
+		'val_f1': []
+	}
+
+	for epoch in range(1, epochs + 1):
+		# training step
+		train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
+
+		# validation step
+		val_metrics = eval_model(model, val_loader, device)
+		val_loss = 1.0 - val_metrics['accuracy']  # proxy for loss
+
+		# record history
+		history['train_loss'].append(train_loss)
+		history['val_loss'].append(val_loss)
+		history['val_accuracy'].append(val_metrics['accuracy'])
+		history['val_f1'].append(val_metrics['f1'])
+
+		tqdm.write(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_acc={val_metrics['accuracy']:.4f}, val_f1={val_metrics['f1']:.4f}")
+
+		# early stopping
+		if val_loss < best_val_loss:
+			best_val_loss = val_loss
+			epochs_no_improve = 0
+			# torch.save(model.state_dict(), 'best_model.pth')
+		else:
+			epochs_no_improve += 1
+			if epochs_no_improve >= patience:
+				print(f"Early stopping at epoch {epoch}")
+				break
+
+	return history
+
+
 def train_epoch(model, loader, optimizer, criterion, device):
 	"""
 	Train for one epoch, with tqdm progress bar.
@@ -157,7 +206,7 @@ def train_epoch(model, loader, optimizer, criterion, device):
 	total_loss = 0.0
 
 	# wrap loader with tqdm for progress visualization
-	for x_batch, y_batch in tqdm(loader, desc='Batch', leave=False):
+	for x_batch, y_batch in tqdm(loader, desc='Batch'):
 		x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 		optimizer.zero_grad()
 		logits = model(x_batch)
@@ -189,51 +238,6 @@ def eval_model(model, loader, device):
 		'recall': recall_score(trues, preds, zero_division=0),
 		'f1': f1_score(trues, preds, zero_division=0)
 	}
-
-
-def train_model(model, train_loader, val_loader, optimizer, criterion, device, epochs=10, patience=3):
-	"""
-	Train model with early stopping and record training history.
-	Returns history dict containing loss and metrics per epoch.
-	"""
-	best_val_loss = float('inf')
-	epochs_no_improve = 0
-
-	history = {
-		'train_loss': [],
-		'val_loss': [],
-		'val_accuracy': [],
-		'val_f1': []
-	}
-
-	for epoch in range(1, epochs + 1):
-		# training step
-		train_loss = train_epoch(model, train_loader, optimizer, criterion, device)
-
-		# validation step
-		val_metrics = eval_model(model, val_loader, device)
-		val_loss = 1.0 - val_metrics['accuracy']  # proxy for loss
-
-		# record history
-		history['train_loss'].append(train_loss)
-		history['val_loss'].append(val_loss)
-		history['val_accuracy'].append(val_metrics['accuracy'])
-		history['val_f1'].append(val_metrics['f1'])
-
-		print(f"Epoch {epoch}: train_loss={train_loss:.4f}, val_acc={val_metrics['accuracy']:.4f}, val_f1={val_metrics['f1']:.4f}")
-
-		# early stopping
-		if val_loss < best_val_loss:
-			best_val_loss = val_loss
-			epochs_no_improve = 0
-			torch.save(model.state_dict(), 'best_model.pth')
-		else:
-			epochs_no_improve += 1
-			if epochs_no_improve >= patience:
-				print(f"Early stopping at epoch {epoch}")
-				break
-
-	return history
 
 
 # -------------------------
@@ -272,6 +276,23 @@ def plot_training_history(history):
 	plt.show()
 
 
+def plot_val_loss_comparison(history1, history2, label1='Model 1', label2='Model 2'):
+	"""
+	Plot validation loss comparison between two models.
+	"""
+	epochs = range(1, len(history1['val_loss']) + 1)
+
+	plt.figure()
+	plt.plot(epochs, history1['val_loss'], label=label1)
+	plt.plot(epochs, history2['val_loss'], label=label2)
+	plt.title('Validation Loss Comparison')
+	plt.xlabel('Epoch')
+	plt.ylabel('Validation Loss')
+	plt.legend()
+	plt.grid(True)
+	plt.show()
+
+
 # -------------------------
 # 8. Main Execution
 # -------------------------
@@ -281,7 +302,7 @@ def main():
 
 	# prepare vocabulary
 	tokens = [t.lower() for text in df['text'] for t in text.split()]
-	vocab = Vocab(tokens, max_size=50000, min_freq=2)
+	vocab = Vocab(tokens, max_size=100000, min_freq=1)
 
 	# prepare dataset and splits
 	texts, labels = df['text'].values, df['label'].values
@@ -302,27 +323,34 @@ def main():
 
 	# instantiate models
 	attn_model = AttentionClassifier(len(vocab.i2s)).to(device)
-	rnn_model = RNNClassifier(len(vocab.i2s), rnn_type='gru').to(device)
+	rnn_model = RNNClassifier(len(vocab.i2s), rnn_type='rnn').to(device)
 
 	# loss and optimizers
 	criterion = nn.BCEWithLogitsLoss()
-	attn_opt = torch.optim.Adam(attn_model.parameters(), lr=1e-3)
-	rnn_opt = torch.optim.Adam(rnn_model.parameters(), lr=1e-3)
+	attn_opt = torch.optim.Adam(attn_model.parameters(), lr=1e-2)
+	rnn_opt = torch.optim.Adam(rnn_model.parameters(), lr=1e-2)
 
 	# train and record history
 	print('Training Attention model...')
-	attn_history = train_model(attn_model, train_loader, val_loader, attn_opt, criterion, device,
-								epochs=10, patience=3)
+	attn_history = train_model(
+		attn_model, train_loader, val_loader, attn_opt, criterion, device,
+		epochs=10, patience=11
+	)
 	plot_training_history(attn_history)
 
 	print('Training RNN model...')
-	rnn_history = train_model(rnn_model, train_loader, val_loader, rnn_opt, criterion, device,
-							   epochs=10, patience=3)
+	rnn_history = train_model(
+		rnn_model, train_loader, val_loader, rnn_opt, criterion, device,
+		epochs=10, patience=11
+	)
 	plot_training_history(rnn_history)
 
 	# final evaluation on test set
 	print('Test Attention:', eval_model(attn_model, test_loader, device))
 	print('Test RNN:', eval_model(rnn_model, test_loader, device))
+
+	# visualize validation loss comparison
+	plot_val_loss_comparison(attn_history, rnn_history, label1='Attention', label2='RNN')
 
 
 if __name__ == '__main__':

@@ -30,7 +30,11 @@ with torch.no_grad():
 
 # 可视化第一个注意力头的注意力矩阵
 plt.figure(figsize=(8, 6))
-sns.heatmap(attn_weights[0], cmap="viridis", xticklabels=range(seq_len), yticklabels=range(seq_len))
+sns.heatmap(
+    attn_weights[0], cmap="viridis",
+    xticklabels=[str(i) for i in range(seq_len)],
+    yticklabels=[str(i) for i in range(seq_len)]
+)
 plt.title("Self-Attention Weights (Head 0)")
 plt.xlabel("Key positions")
 plt.ylabel("Query positions")
