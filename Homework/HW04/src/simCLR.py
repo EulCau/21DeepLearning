@@ -29,8 +29,12 @@ class SimCLRDataset(Dataset):
 class SimCLR(nn.Module):
 	"""SimCLR模型: 基础编码器 + 投影头"""
 
-	def __init__(self, base_encoder=models.resnet18, projection_dim=128):
+	def __init__(self, base_encoder=models.resnet18, projection_dim=128, head_type="mlp_bn"):
 		super().__init__()
+		if not head_type in ["mlp_bn", "mlp_no_bn", "linear", "none"]:
+			head_type = "none"
+		self.head_type = head_type
+
 		# 加载基础编码器
 		self.encoder = base_encoder(weights=None)
 		self.encoder.conv1 = nn.Conv2d(
@@ -38,12 +42,24 @@ class SimCLR(nn.Module):
 		self.encoder.maxpool = nn.Identity()
 		self.encoder.fc = nn.Identity()  # 移除最后的全连接层
 
-		# 投影头 (带 BN 的非线性 MLP)
-		self.projection = nn.Sequential(
-			nn.Linear(512, 512),
-			nn.BatchNorm1d(512),
-			nn.ReLU(inplace=True),
-			nn.Linear(512, projection_dim))
+		# 投影头结构定义
+		if head_type == "mlp_bn":
+			self.projection = nn.Sequential(
+				nn.Linear(512, 512),
+				nn.BatchNorm1d(512),
+				nn.ReLU(inplace=True),
+				nn.Linear(512, projection_dim))
+		elif head_type == "mlp_no_bn":
+			self.projection = nn.Sequential(
+				nn.Linear(512, 512),
+				nn.ReLU(inplace=True),
+				nn.Linear(512, projection_dim))
+		elif head_type == "linear":
+			self.projection = nn.Linear(512, projection_dim)
+		elif head_type == "none":
+			self.projection = nn.Identity()
+		else:
+			raise ValueError(f"Unknown projection head type: {head_type}")
 
 	def forward(self, x):
 		h = self.encoder(x)
@@ -135,7 +151,6 @@ def save_to_log(file_path, tag, phase, data_list):
 			f.write(f"{tag} {phase} {epoch} {val:.6f}\n")
 
 
-
 def main():
 	# 设备配置
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -161,6 +176,8 @@ def main():
 		os.remove(output_file)
 
 	augmentation_tags = {"basic": 1, "color": 2, "gray": 3, "strong": 4}
+
+	head_tags = {"mlp_bn": 5, "mlp_no_bn": 6, "linear": 7, "none": 8}
 
 	# 加载数据
 	train_data, test_data = load_cifar10_subset(path= "../dataset", subset_classes=10, train_percent=0.1)
@@ -211,8 +228,52 @@ def main():
 			# 评估
 			accuracies.append(evaluate_linear(classifier, test_loader, device))
 
-		save_to_log(output_file, tag, "eval", losses)
+		save_to_log(output_file, tag, "eval", accuracies)
 		torch.save(classifier.state_dict(), os.path.join(path_ckp, f"classifier_{aug_name}.pth"))
+
+	for head_type in ["mlp_bn", "mlp_no_bn", "linear", "none"]:
+		tag = head_tags[head_type]
+		print(f"\n==== Training with Projection Head: {head_type} ====")
+
+		simclr_dataset = SimCLRDataset(train_data)  # 或其他固定增强方式
+		train_loader = DataLoader(simclr_dataset, ...)
+
+		model = SimCLR(projection_dim=config["projection_dim"], head_type=head_type).to(device)
+		optimizer = optim.Adam(model.parameters(), lr=config["lr"])
+
+		losses = []
+		for epoch in range(config["epochs"]):
+			losses.append(train_simclr(model, train_loader, optimizer, epoch, device, config))
+
+		save_to_log(output_file, tag, "pretrain", losses)
+		torch.save(model.state_dict(), os.path.join(path_ckp, f"simclr_{head_type}.pth"))
+
+		# 线性评估阶段
+		print("\n=== Starting Linear Evaluation ===")
+		test_loader = DataLoader(
+			test_data, batch_size=config["batch_size"],
+			num_workers=config["num_workers"])
+		classifier = LinearClassifier(model.encoder).to(device)
+		optimizer_cls = optim.Adam(classifier.parameters(), lr=3e-4)
+		criterion = nn.CrossEntropyLoss()
+
+		# 训练分类器
+		accuracies = []
+		for epoch in range(config["eval_epochs"]):
+			classifier.train()
+			for images, labels in DataLoader(train_data, batch_size=config["batch_size"], shuffle=True):
+				images, labels = images.to(device), labels.to(device)
+				optimizer_cls.zero_grad()
+				outputs = classifier(images)
+				loss = criterion(outputs, labels)
+				loss.backward()
+				optimizer_cls.step()
+
+			# 评估
+			accuracies.append(evaluate_linear(classifier, test_loader, device))
+
+		save_to_log(output_file, tag, "eval", accuracies)
+		torch.save(classifier.state_dict(), os.path.join(path_ckp, f"classifier_{head_type}.pth"))
 
 
 if __name__ == "__main__":

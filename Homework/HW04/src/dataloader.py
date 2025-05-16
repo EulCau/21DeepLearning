@@ -42,7 +42,7 @@ def load_cifar10_subset(path, subset_classes=10, train_percent=0.1, seed=42):
 	return train_subset, test_subset
 
 # 数据增强定义
-def get_augmentations(name="basic", normalize=True):
+def get_augmentations(name="strong", normalize=True):
 	"""
 	定义SimCLR数据增强
 	参数:
