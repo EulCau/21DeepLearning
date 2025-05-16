@@ -1,21 +1,21 @@
-import numpy as np
+import os
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models, transforms
 
 from dataloader import load_cifar10_subset, get_augmentations
 
 
-# 创建SimCLR数据增强的数据集
+# 创建 SimCLR 数据增强的数据集
 class SimCLRDataset(Dataset):
-	"""生成SimCLR双视图增强数据的Dataset类"""
+	"""生成 SimCLR 双视图增强数据的 Dataset 类"""
 
-	def __init__(self, dataset):
+	def __init__(self, dataset, argument_name = "basic"):
 		self.dataset = dataset
-		self.augment = get_augmentations(normalize=True)
+		self.augment = get_augmentations(argument_name, True)
 
 	def __getitem__(self, index):
 		img, _ = self.dataset[index]  # 忽略原始标签
@@ -27,7 +27,7 @@ class SimCLRDataset(Dataset):
 
 
 class SimCLR(nn.Module):
-	"""SimCLR模型：基础编码器+投影头"""
+	"""SimCLR模型: 基础编码器 + 投影头"""
 
 	def __init__(self, base_encoder=models.resnet18, projection_dim=128):
 		super().__init__()
@@ -38,7 +38,7 @@ class SimCLR(nn.Module):
 		self.encoder.maxpool = nn.Identity()
 		self.encoder.fc = nn.Identity()  # 移除最后的全连接层
 
-		# 投影头（带BN的非线性MLP）
+		# 投影头 (带 BN 的非线性 MLP)
 		self.projection = nn.Sequential(
 			nn.Linear(512, 512),
 			nn.BatchNorm1d(512),
@@ -74,7 +74,7 @@ def nt_xent_loss(z, temperature=0.5, device="cuda"):
 	# 计算相似度矩阵 [2N x 2N]
 	sim_matrix = torch.mm(z, z.T) / temperature
 
-	# 生成正样本对标签（每个样本的正对索引）
+	# 生成正样本对标签 (每个样本的正对索引)
 	labels = torch.arange(2 * batch_size, device=device)
 	labels = (labels + batch_size) % (2 * batch_size)  # 正对索引偏移
 
@@ -83,7 +83,7 @@ def nt_xent_loss(z, temperature=0.5, device="cuda"):
 	return loss
 
 def train_simclr(model, train_loader, optimizer, epoch, device, config):
-	"""SimCLR训练"""
+	"""SimCLR 训练"""
 	model.train()
 	total_loss = 0.0
 
@@ -100,7 +100,7 @@ def train_simclr(model, train_loader, optimizer, epoch, device, config):
 		total_loss += loss.item() * x.size(0)
 
 	avg_loss = total_loss / len(train_loader.dataset)
-	print(f"Epoch [{epoch + 1}/{config['epochs']}] Loss: {avg_loss:.4f}")
+	print(f"Epoch [{epoch + 1}/{config["epochs"]}] Loss: {avg_loss:.4f}")
 
 	return avg_loss
 
@@ -124,16 +124,16 @@ def evaluate_linear(model, test_loader, device):
 	return accuracy
 
 
-def show_plot(data, label, title, x_label, y_label, fig_name):
-	plt.figure(figsize=(10, 6))
-	plt.plot(range(1, len(data) + 1), data, 'b-', linewidth=2, label=label)
-	plt.title(title, fontsize=14)
-	plt.xlabel(x_label, fontsize=12)
-	plt.ylabel(y_label, fontsize=12)
-	plt.grid(True, linestyle='--', alpha=0.7)
-	plt.legend()
-	plt.savefig(fig_name, dpi=300, bbox_inches='tight')
-	plt.show()
+def save_to_log(file_path, tag, phase, data_list):
+	"""
+	保存数据到日志文件。
+	每行格式：<tag> <phase> <epoch> <value>
+	phase: "pretrain" 或 "eval"
+	"""
+	with open(file_path, 'a') as f:
+		for epoch, val in enumerate(data_list, start=1):
+			f.write(f"{tag} {phase} {epoch} {val:.6f}\n")
+
 
 
 def main():
@@ -151,12 +151,19 @@ def main():
 		"num_workers": 4
 	}
 
-	# 加载数据
-	train_data, test_data = load_cifar10_subset(path= '../dataset', subset_classes=10, train_percent=1)
+	path_result = "../result"
+	path_ckp = "../checkpoints"
+	os.makedirs(path_result, exist_ok=True)
+	os.makedirs(path_ckp, exist_ok=True)
 
-	simclr_dataset = SimCLRDataset(train_data)
-	train_loader = DataLoader(simclr_dataset, batch_size=config["batch_size"],
-							  shuffle=True, num_workers=config["num_workers"], drop_last=True)
+	output_file = os.path.join(path_result, "output.txt")
+	if os.path.exists(output_file):
+		os.remove(output_file)
+
+	augmentation_tags = {"basic": 1, "color": 2, "gray": 3, "strong": 4}
+
+	# 加载数据
+	train_data, test_data = load_cifar10_subset(path= "../dataset", subset_classes=10, train_percent=0.1)
 
 	# 初始化模型和优化器
 	model = SimCLR(projection_dim=config["projection_dim"]).to(device)
@@ -164,39 +171,48 @@ def main():
 
 	# 预训练阶段
 	print("=== Starting SimCLR Pretraining ===")
-	losses = []
-	for epoch in range(config["epochs"]):
-		losses.append(train_simclr(model, train_loader, optimizer, epoch, device, config))
-	show_plot(
-		losses, "Training Loss", "SimCLR Pretraining Loss Curve",
-		"Epoch", "Loss", "../result/pretrain_loss.png")
 
-	# 线性评估阶段
-	print("\n=== Starting Linear Evaluation ===")
-	test_loader = DataLoader(
-		test_data, batch_size=config["batch_size"],
-		num_workers=config["num_workers"])
-	classifier = LinearClassifier(model.encoder).to(device)
-	optimizer_cls = optim.Adam(classifier.parameters(), lr=3e-4)
-	criterion = nn.CrossEntropyLoss()
+	for aug_name in ["basic", "color", "gray", "strong"]:
+		tag = augmentation_tags[aug_name]
+		print(f"\n==== Training with Augmentation: {aug_name} ====")
 
-	# 训练分类器
-	accuracies = []
-	for epoch in range(config["eval_epochs"]):
-		classifier.train()
-		for images, labels in DataLoader(train_data, batch_size=config["batch_size"], shuffle=True):
-			images, labels = images.to(device), labels.to(device)
-			optimizer_cls.zero_grad()
-			outputs = classifier(images)
-			loss = criterion(outputs, labels)
-			loss.backward()
-			optimizer_cls.step()
+		simclr_dataset = SimCLRDataset(train_data, aug_name)
+		train_loader = DataLoader(simclr_dataset, batch_size=config["batch_size"],
+								  shuffle=True, num_workers=config["num_workers"], drop_last=True)
 
-		# 评估
-		accuracies.append(evaluate_linear(classifier, test_loader, device))
-	show_plot(
-		accuracies, "Test Accuracy", "Linear Evaluation Accuracy Curve",
-		"Epoch", "Accuracy (%)", "../result/linear_eval_accuracy.png")
+		losses = []
+		for epoch in range(config["epochs"]):
+			losses.append(train_simclr(model, train_loader, optimizer, epoch, device, config))
+
+		save_to_log(output_file, tag, "pretrain", losses)
+		torch.save(model.state_dict(), os.path.join(path_ckp, f"simclr_{aug_name}.pth"))
+
+		# 线性评估阶段
+		print("\n=== Starting Linear Evaluation ===")
+		test_loader = DataLoader(
+			test_data, batch_size=config["batch_size"],
+			num_workers=config["num_workers"])
+		classifier = LinearClassifier(model.encoder).to(device)
+		optimizer_cls = optim.Adam(classifier.parameters(), lr=3e-4)
+		criterion = nn.CrossEntropyLoss()
+
+		# 训练分类器
+		accuracies = []
+		for epoch in range(config["eval_epochs"]):
+			classifier.train()
+			for images, labels in DataLoader(train_data, batch_size=config["batch_size"], shuffle=True):
+				images, labels = images.to(device), labels.to(device)
+				optimizer_cls.zero_grad()
+				outputs = classifier(images)
+				loss = criterion(outputs, labels)
+				loss.backward()
+				optimizer_cls.step()
+
+			# 评估
+			accuracies.append(evaluate_linear(classifier, test_loader, device))
+
+		save_to_log(output_file, tag, "eval", losses)
+		torch.save(classifier.state_dict(), os.path.join(path_ckp, f"classifier_{aug_name}.pth"))
 
 
 if __name__ == "__main__":
