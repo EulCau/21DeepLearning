@@ -10,7 +10,7 @@ augment_label_map = {
     4: 'strong'
 }
 
-projhead_label_map = {
+head_label_map = {
     5: 'mlp_bn',
     6: 'mlp_no_bn',
     7: 'linear',
@@ -28,14 +28,14 @@ def load_metrics(file_path):
             metrics[tag][phase].append(value)
     return metrics
 
-def plot_group(metrics, tags, label_map, phase, ylabel, title, filename):
+def plot_group(metrics, tags, label_map, phase, y_label, title, filename):
     plt.figure(figsize=(10, 6))
     for tag in tags:
         if tag in metrics and phase in metrics[tag]:
             values = metrics[tag][phase]
             plt.plot(range(1, len(values)+1), values, label=label_map[tag], linewidth=2)
     plt.xlabel("Epoch", fontsize=12)
-    plt.ylabel(ylabel, fontsize=12)
+    plt.ylabel(y_label, fontsize=12)
     plt.title(title, fontsize=14)
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
@@ -53,31 +53,31 @@ def main():
     plot_group(metrics, tags=[1, 2, 3, 4],
                label_map=augment_label_map,
                phase="pretrain",
-               ylabel="Loss",
+               y_label="Loss",
                title="Pretraining Loss (Augmentation)",
                filename=os.path.join(output_dir, "pretrain_loss_augment.png"))
 
     plot_group(metrics, tags=[1, 2, 3, 4],
                label_map=augment_label_map,
                phase="eval",
-               ylabel="Accuracy (%)",
+               y_label="Accuracy (%)",
                title="Evaluation Accuracy (Augmentation)",
                filename=os.path.join(output_dir, "eval_acc_augment.png"))
 
     # 绘图：projection head
     plot_group(metrics, tags=[5, 6, 7, 8],
-               label_map=projhead_label_map,
+               label_map=head_label_map,
                phase="pretrain",
-               ylabel="Loss",
+               y_label="Loss",
                title="Pretraining Loss (Projection Head)",
-               filename=os.path.join(output_dir, "pretrain_loss_projhead.png"))
+               filename=os.path.join(output_dir, "pretrain_loss_head.png"))
 
     plot_group(metrics, tags=[5, 6, 7, 8],
-               label_map=projhead_label_map,
+               label_map=head_label_map,
                phase="eval",
-               ylabel="Accuracy (%)",
+               y_label="Accuracy (%)",
                title="Evaluation Accuracy (Projection Head)",
-               filename=os.path.join(output_dir, "eval_acc_projhead.png"))
+               filename=os.path.join(output_dir, "eval_acc_head.png"))
 
 if __name__ == "__main__":
     main()

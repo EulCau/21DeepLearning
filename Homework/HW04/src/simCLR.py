@@ -180,7 +180,7 @@ def main():
 	head_tags = {"mlp_bn": 5, "mlp_no_bn": 6, "linear": 7, "none": 8}
 
 	# 加载数据
-	train_data, test_data = load_cifar10_subset(path= "../dataset", subset_classes=10, train_percent=0.1)
+	train_data, test_data = load_cifar10_subset(path= "../dataset", subset_classes=10, train_percent=1)
 
 	# 初始化模型和优化器
 	model = SimCLR(projection_dim=config["projection_dim"]).to(device)
