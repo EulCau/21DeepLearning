@@ -2,13 +2,23 @@ import os
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
+# 标签映射
+augment_label_map = {
+    1: 'basic',
+    2: 'color',
+    3: 'gray',
+    4: 'strong'
+}
+
+projhead_label_map = {
+    5: 'mlp_bn',
+    6: 'mlp_no_bn',
+    7: 'linear',
+    8: 'none'
+}
 
 def load_metrics(file_path):
-    """
-    加载实验数据文件，按 tag 和 phase 分类
-    返回结构: metrics[tag][phase] = [epoch1, epoch2, ...]
-    """
-    metrics = defaultdict(lambda: defaultdict(list))
+    metrics = defaultdict(lambda: defaultdict(list))  # tag -> phase -> [values]
     with open(file_path, 'r') as f:
         for line in f:
             parts = line.strip().split()
@@ -18,53 +28,56 @@ def load_metrics(file_path):
             metrics[tag][phase].append(value)
     return metrics
 
-
-def plot_metric(metrics, phase, y_label, title, filename, label_map):
-    """
-    根据 phase 画图, 如 pretrain 或 eval
-    """
+def plot_group(metrics, tags, label_map, phase, ylabel, title, filename):
     plt.figure(figsize=(10, 6))
-    for tag, phases in metrics.items():
-        if phase in phases:
-            values = phases[phase]
-            plt.plot(range(1, len(values) + 1), values, label=label_map.get(tag, f"Tag {tag}"), linewidth=2)
-
-    plt.title(title, fontsize=14)
+    for tag in tags:
+        if tag in metrics and phase in metrics[tag]:
+            values = metrics[tag][phase]
+            plt.plot(range(1, len(values)+1), values, label=label_map[tag], linewidth=2)
     plt.xlabel("Epoch", fontsize=12)
-    plt.ylabel(y_label, fontsize=12)
-    plt.legend()
+    plt.ylabel(ylabel, fontsize=12)
+    plt.title(title, fontsize=14)
     plt.grid(True, linestyle='--', alpha=0.6)
+    plt.legend()
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.show()
 
-
 def main():
-    # 路径配置
-    metric_file = "../result/output.txt"
+    file_path = "../result/output.txt"
     output_dir = "../result"
     os.makedirs(output_dir, exist_ok=True)
 
-    # tag -> name 映射
-    label_map = {
-        1: 'basic',
-        2: 'color',
-        3: 'gray',
-        4: 'strong'
-    }
+    metrics = load_metrics(file_path)
 
-    # 加载并绘图
-    metrics = load_metrics(metric_file)
+    # 绘图：增强策略
+    plot_group(metrics, tags=[1, 2, 3, 4],
+               label_map=augment_label_map,
+               phase="pretrain",
+               ylabel="Loss",
+               title="Pretraining Loss (Augmentation)",
+               filename=os.path.join(output_dir, "pretrain_loss_augment.png"))
 
-    plot_metric(metrics, phase="pretrain", y_label="Loss",
-				title="SimCLR Pretraining Loss",
-				filename=os.path.join(output_dir, "pretrain_loss_all.png"),
-				label_map=label_map)
+    plot_group(metrics, tags=[1, 2, 3, 4],
+               label_map=augment_label_map,
+               phase="eval",
+               ylabel="Accuracy (%)",
+               title="Evaluation Accuracy (Augmentation)",
+               filename=os.path.join(output_dir, "eval_acc_augment.png"))
 
-    plot_metric(metrics, phase="eval", y_label="Accuracy (%)",
-				title="Linear Evaluation Accuracy",
-				filename=os.path.join(output_dir, "eval_accuracy_all.png"),
-				label_map=label_map)
+    # 绘图：projection head
+    plot_group(metrics, tags=[5, 6, 7, 8],
+               label_map=projhead_label_map,
+               phase="pretrain",
+               ylabel="Loss",
+               title="Pretraining Loss (Projection Head)",
+               filename=os.path.join(output_dir, "pretrain_loss_projhead.png"))
 
+    plot_group(metrics, tags=[5, 6, 7, 8],
+               label_map=projhead_label_map,
+               phase="eval",
+               ylabel="Accuracy (%)",
+               title="Evaluation Accuracy (Projection Head)",
+               filename=os.path.join(output_dir, "eval_acc_projhead.png"))
 
 if __name__ == "__main__":
     main()
