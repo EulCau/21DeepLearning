@@ -1,0 +1,1234 @@
+D:\CXTX_copy\08DeepLearning\Homework\.venv\Scripts\python.exe D:\CXTX_copy\08DeepLearning\Homework\HW04\src\simCLR.py 
+=== Starting SimCLR Pretraining ===
+
+==== Training with Augmentation: basic ====
+Epoch [1/100] Loss: 7.1869
+Epoch [2/100] Loss: 3.9829
+Epoch [3/100] Loss: 3.4504
+Epoch [4/100] Loss: 3.2012
+Epoch [5/100] Loss: 3.0614
+Epoch [6/100] Loss: 2.9462
+Epoch [7/100] Loss: 2.8857
+Epoch [8/100] Loss: 2.8097
+Epoch [9/100] Loss: 2.7810
+Epoch [10/100] Loss: 2.7211
+Epoch [11/100] Loss: 2.6837
+Epoch [12/100] Loss: 2.6650
+Epoch [13/100] Loss: 2.6277
+Epoch [14/100] Loss: 2.6094
+Epoch [15/100] Loss: 2.6016
+Epoch [16/100] Loss: 2.5668
+Epoch [17/100] Loss: 2.5676
+Epoch [18/100] Loss: 2.5537
+Epoch [19/100] Loss: 2.5272
+Epoch [20/100] Loss: 2.5129
+Epoch [21/100] Loss: 2.5035
+Epoch [22/100] Loss: 2.5093
+Epoch [23/100] Loss: 2.4874
+Epoch [24/100] Loss: 2.4776
+Epoch [25/100] Loss: 2.4699
+Epoch [26/100] Loss: 2.4602
+Epoch [27/100] Loss: 2.4567
+Epoch [28/100] Loss: 2.4505
+Epoch [29/100] Loss: 2.4420
+Epoch [30/100] Loss: 2.4332
+Epoch [31/100] Loss: 2.4267
+Epoch [32/100] Loss: 2.4095
+Epoch [33/100] Loss: 2.4090
+Epoch [34/100] Loss: 2.4044
+Epoch [35/100] Loss: 2.3938
+Epoch [36/100] Loss: 2.3909
+Epoch [37/100] Loss: 2.3880
+Epoch [38/100] Loss: 2.3702
+Epoch [39/100] Loss: 2.3786
+Epoch [40/100] Loss: 2.3536
+Epoch [41/100] Loss: 2.3499
+Epoch [42/100] Loss: 2.3515
+Epoch [43/100] Loss: 2.3341
+Epoch [44/100] Loss: 2.3352
+Epoch [45/100] Loss: 2.3228
+Epoch [46/100] Loss: 2.3282
+Epoch [47/100] Loss: 2.3167
+Epoch [48/100] Loss: 2.3253
+Epoch [49/100] Loss: 2.3188
+Epoch [50/100] Loss: 2.3051
+Epoch [51/100] Loss: 2.3101
+Epoch [52/100] Loss: 2.2899
+Epoch [53/100] Loss: 2.2868
+Epoch [54/100] Loss: 2.2841
+Epoch [55/100] Loss: 2.2680
+Epoch [56/100] Loss: 2.2657
+Epoch [57/100] Loss: 2.2643
+Epoch [58/100] Loss: 2.2632
+Epoch [59/100] Loss: 2.2578
+Epoch [60/100] Loss: 2.2576
+Epoch [61/100] Loss: 2.2512
+Epoch [62/100] Loss: 2.2353
+Epoch [63/100] Loss: 2.2356
+Epoch [64/100] Loss: 2.2286
+Epoch [65/100] Loss: 2.2311
+Epoch [66/100] Loss: 2.2291
+Epoch [67/100] Loss: 2.2217
+Epoch [68/100] Loss: 2.2177
+Epoch [69/100] Loss: 2.2171
+Epoch [70/100] Loss: 2.2134
+Epoch [71/100] Loss: 2.1987
+Epoch [72/100] Loss: 2.2023
+Epoch [73/100] Loss: 2.2012
+Epoch [74/100] Loss: 2.1882
+Epoch [75/100] Loss: 2.1934
+Epoch [76/100] Loss: 2.1842
+Epoch [77/100] Loss: 2.1861
+Epoch [78/100] Loss: 2.1798
+Epoch [79/100] Loss: 2.1781
+Epoch [80/100] Loss: 2.1753
+Epoch [81/100] Loss: 2.1677
+Epoch [82/100] Loss: 2.1711
+Epoch [83/100] Loss: 2.1637
+Epoch [84/100] Loss: 2.1623
+Epoch [85/100] Loss: 2.1544
+Epoch [86/100] Loss: 2.1500
+Epoch [87/100] Loss: 2.1506
+Epoch [88/100] Loss: 2.1506
+Epoch [89/100] Loss: 2.1497
+Epoch [90/100] Loss: 2.1421
+Epoch [91/100] Loss: 2.1350
+Epoch [92/100] Loss: 2.1330
+Epoch [93/100] Loss: 2.1332
+Epoch [94/100] Loss: 2.1329
+Epoch [95/100] Loss: 2.1280
+Epoch [96/100] Loss: 2.1283
+Epoch [97/100] Loss: 2.1271
+Epoch [98/100] Loss: 2.1213
+Epoch [99/100] Loss: 2.1220
+Epoch [100/100] Loss: 2.1192
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 58.30%
+Test Accuracy: 61.45%
+Test Accuracy: 62.98%
+Test Accuracy: 64.13%
+Test Accuracy: 64.89%
+Test Accuracy: 65.28%
+Test Accuracy: 65.96%
+Test Accuracy: 66.19%
+Test Accuracy: 66.51%
+Test Accuracy: 66.57%
+Test Accuracy: 66.89%
+Test Accuracy: 66.84%
+Test Accuracy: 66.94%
+Test Accuracy: 67.24%
+Test Accuracy: 67.24%
+Test Accuracy: 67.35%
+Test Accuracy: 67.56%
+Test Accuracy: 67.80%
+Test Accuracy: 67.69%
+Test Accuracy: 67.58%
+Test Accuracy: 67.69%
+Test Accuracy: 67.95%
+Test Accuracy: 67.82%
+Test Accuracy: 67.80%
+Test Accuracy: 67.83%
+Test Accuracy: 68.30%
+Test Accuracy: 68.23%
+Test Accuracy: 67.93%
+Test Accuracy: 68.37%
+Test Accuracy: 67.99%
+Test Accuracy: 68.35%
+Test Accuracy: 68.22%
+Test Accuracy: 68.08%
+Test Accuracy: 67.92%
+Test Accuracy: 68.12%
+Test Accuracy: 68.26%
+Test Accuracy: 68.27%
+Test Accuracy: 68.03%
+Test Accuracy: 68.68%
+Test Accuracy: 68.31%
+Test Accuracy: 68.21%
+Test Accuracy: 68.43%
+Test Accuracy: 68.22%
+Test Accuracy: 68.19%
+Test Accuracy: 68.30%
+Test Accuracy: 68.42%
+Test Accuracy: 68.12%
+Test Accuracy: 68.38%
+Test Accuracy: 68.23%
+Test Accuracy: 68.56%
+
+==== Training with Augmentation: color ====
+Epoch [1/100] Loss: 5.1858
+Epoch [2/100] Loss: 4.2267
+Epoch [3/100] Loss: 4.0660
+Epoch [4/100] Loss: 3.9769
+Epoch [5/100] Loss: 3.9455
+Epoch [6/100] Loss: 3.8844
+Epoch [7/100] Loss: 3.8684
+Epoch [8/100] Loss: 3.8475
+Epoch [9/100] Loss: 3.8218
+Epoch [10/100] Loss: 3.8054
+Epoch [11/100] Loss: 3.7912
+Epoch [12/100] Loss: 3.7700
+Epoch [13/100] Loss: 3.7595
+Epoch [14/100] Loss: 3.7648
+Epoch [15/100] Loss: 3.7464
+Epoch [16/100] Loss: 3.7259
+Epoch [17/100] Loss: 3.7292
+Epoch [18/100] Loss: 3.7198
+Epoch [19/100] Loss: 3.7250
+Epoch [20/100] Loss: 3.7019
+Epoch [21/100] Loss: 3.7075
+Epoch [22/100] Loss: 3.7010
+Epoch [23/100] Loss: 3.6773
+Epoch [24/100] Loss: 3.6812
+Epoch [25/100] Loss: 3.6666
+Epoch [26/100] Loss: 3.6706
+Epoch [27/100] Loss: 3.6694
+Epoch [28/100] Loss: 3.6672
+Epoch [29/100] Loss: 3.6654
+Epoch [30/100] Loss: 3.6662
+Epoch [31/100] Loss: 3.6555
+Epoch [32/100] Loss: 3.6565
+Epoch [33/100] Loss: 3.6563
+Epoch [34/100] Loss: 3.6547
+Epoch [35/100] Loss: 3.6513
+Epoch [36/100] Loss: 3.6421
+Epoch [37/100] Loss: 3.6479
+Epoch [38/100] Loss: 3.6468
+Epoch [39/100] Loss: 3.6420
+Epoch [40/100] Loss: 3.6390
+Epoch [41/100] Loss: 3.6373
+Epoch [42/100] Loss: 3.6329
+Epoch [43/100] Loss: 3.6262
+Epoch [44/100] Loss: 3.6295
+Epoch [45/100] Loss: 3.6296
+Epoch [46/100] Loss: 3.6154
+Epoch [47/100] Loss: 3.6227
+Epoch [48/100] Loss: 3.6265
+Epoch [49/100] Loss: 3.6280
+Epoch [50/100] Loss: 3.6212
+Epoch [51/100] Loss: 3.6199
+Epoch [52/100] Loss: 3.6095
+Epoch [53/100] Loss: 3.6179
+Epoch [54/100] Loss: 3.6188
+Epoch [55/100] Loss: 3.6074
+Epoch [56/100] Loss: 3.6255
+Epoch [57/100] Loss: 3.6079
+Epoch [58/100] Loss: 3.6165
+Epoch [59/100] Loss: 3.6051
+Epoch [60/100] Loss: 3.5997
+Epoch [61/100] Loss: 3.6190
+Epoch [62/100] Loss: 3.6150
+Epoch [63/100] Loss: 3.6089
+Epoch [64/100] Loss: 3.5935
+Epoch [65/100] Loss: 3.5961
+Epoch [66/100] Loss: 3.6041
+Epoch [67/100] Loss: 3.5983
+Epoch [68/100] Loss: 3.6042
+Epoch [69/100] Loss: 3.6007
+Epoch [70/100] Loss: 3.5950
+Epoch [71/100] Loss: 3.6038
+Epoch [72/100] Loss: 3.5939
+Epoch [73/100] Loss: 3.6009
+Epoch [74/100] Loss: 3.5914
+Epoch [75/100] Loss: 3.5979
+Epoch [76/100] Loss: 3.5922
+Epoch [77/100] Loss: 3.5928
+Epoch [78/100] Loss: 3.5904
+Epoch [79/100] Loss: 3.5894
+Epoch [80/100] Loss: 3.5972
+Epoch [81/100] Loss: 3.5886
+Epoch [82/100] Loss: 3.5863
+Epoch [83/100] Loss: 3.5874
+Epoch [84/100] Loss: 3.5862
+Epoch [85/100] Loss: 3.5902
+Epoch [86/100] Loss: 3.6000
+Epoch [87/100] Loss: 3.5869
+Epoch [88/100] Loss: 3.5683
+Epoch [89/100] Loss: 3.5831
+Epoch [90/100] Loss: 3.5877
+Epoch [91/100] Loss: 3.5719
+Epoch [92/100] Loss: 3.5893
+Epoch [93/100] Loss: 3.5928
+Epoch [94/100] Loss: 3.5715
+Epoch [95/100] Loss: 3.5771
+Epoch [96/100] Loss: 3.5710
+Epoch [97/100] Loss: 3.5844
+Epoch [98/100] Loss: 3.5734
+Epoch [99/100] Loss: 3.5797
+Epoch [100/100] Loss: 3.5731
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 56.47%
+Test Accuracy: 61.09%
+Test Accuracy: 62.80%
+Test Accuracy: 64.08%
+Test Accuracy: 65.05%
+Test Accuracy: 65.21%
+Test Accuracy: 65.86%
+Test Accuracy: 65.76%
+Test Accuracy: 66.53%
+Test Accuracy: 66.39%
+Test Accuracy: 66.76%
+Test Accuracy: 66.59%
+Test Accuracy: 66.95%
+Test Accuracy: 66.90%
+Test Accuracy: 67.00%
+Test Accuracy: 66.91%
+Test Accuracy: 67.44%
+Test Accuracy: 67.27%
+Test Accuracy: 67.74%
+Test Accuracy: 67.82%
+Test Accuracy: 67.58%
+Test Accuracy: 67.85%
+Test Accuracy: 67.86%
+Test Accuracy: 67.68%
+Test Accuracy: 68.02%
+Test Accuracy: 67.66%
+Test Accuracy: 67.79%
+Test Accuracy: 67.64%
+Test Accuracy: 68.08%
+Test Accuracy: 67.85%
+Test Accuracy: 68.09%
+Test Accuracy: 67.87%
+Test Accuracy: 67.81%
+Test Accuracy: 68.23%
+Test Accuracy: 67.92%
+Test Accuracy: 67.96%
+Test Accuracy: 68.07%
+Test Accuracy: 68.33%
+Test Accuracy: 68.36%
+Test Accuracy: 68.36%
+Test Accuracy: 68.58%
+Test Accuracy: 68.58%
+Test Accuracy: 68.14%
+Test Accuracy: 68.32%
+Test Accuracy: 68.32%
+Test Accuracy: 68.25%
+Test Accuracy: 68.25%
+Test Accuracy: 68.41%
+Test Accuracy: 68.44%
+Test Accuracy: 68.68%
+
+==== Training with Augmentation: gray ====
+Epoch [1/100] Loss: 6.3273
+Epoch [2/100] Loss: 6.0411
+Epoch [3/100] Loss: 5.9931
+Epoch [4/100] Loss: 5.9397
+Epoch [5/100] Loss: 5.9369
+Epoch [6/100] Loss: 5.9200
+Epoch [7/100] Loss: 5.8676
+Epoch [8/100] Loss: 5.8510
+Epoch [9/100] Loss: 5.8666
+Epoch [10/100] Loss: 5.8473
+Epoch [11/100] Loss: 5.8330
+Epoch [12/100] Loss: 5.8462
+Epoch [13/100] Loss: 5.8407
+Epoch [14/100] Loss: 5.7869
+Epoch [15/100] Loss: 5.8129
+Epoch [16/100] Loss: 5.8053
+Epoch [17/100] Loss: 5.8068
+Epoch [18/100] Loss: 5.7912
+Epoch [19/100] Loss: 5.7935
+Epoch [20/100] Loss: 5.7717
+Epoch [21/100] Loss: 5.7776
+Epoch [22/100] Loss: 5.7846
+Epoch [23/100] Loss: 5.7441
+Epoch [24/100] Loss: 5.7706
+Epoch [25/100] Loss: 5.7653
+Epoch [26/100] Loss: 5.7178
+Epoch [27/100] Loss: 5.7496
+Epoch [28/100] Loss: 5.7244
+Epoch [29/100] Loss: 5.7223
+Epoch [30/100] Loss: 5.7427
+Epoch [31/100] Loss: 5.7250
+Epoch [32/100] Loss: 5.7419
+Epoch [33/100] Loss: 5.7258
+Epoch [34/100] Loss: 5.7205
+Epoch [35/100] Loss: 5.7287
+Epoch [36/100] Loss: 5.7389
+Epoch [37/100] Loss: 5.7426
+Epoch [38/100] Loss: 5.7001
+Epoch [39/100] Loss: 5.7413
+Epoch [40/100] Loss: 5.7164
+Epoch [41/100] Loss: 5.7261
+Epoch [42/100] Loss: 5.6838
+Epoch [43/100] Loss: 5.7314
+Epoch [44/100] Loss: 5.6931
+Epoch [45/100] Loss: 5.7236
+Epoch [46/100] Loss: 5.6911
+Epoch [47/100] Loss: 5.7187
+Epoch [48/100] Loss: 5.6883
+Epoch [49/100] Loss: 5.7128
+Epoch [50/100] Loss: 5.6825
+Epoch [51/100] Loss: 5.7217
+Epoch [52/100] Loss: 5.6876
+Epoch [53/100] Loss: 5.7008
+Epoch [54/100] Loss: 5.6782
+Epoch [55/100] Loss: 5.6919
+Epoch [56/100] Loss: 5.7150
+Epoch [57/100] Loss: 5.7079
+Epoch [58/100] Loss: 5.6876
+Epoch [59/100] Loss: 5.7124
+Epoch [60/100] Loss: 5.7011
+Epoch [61/100] Loss: 5.6400
+Epoch [62/100] Loss: 5.6891
+Epoch [63/100] Loss: 5.6720
+Epoch [64/100] Loss: 5.6974
+Epoch [65/100] Loss: 5.6858
+Epoch [66/100] Loss: 5.6928
+Epoch [67/100] Loss: 5.6699
+Epoch [68/100] Loss: 5.6529
+Epoch [69/100] Loss: 5.6871
+Epoch [70/100] Loss: 5.6543
+Epoch [71/100] Loss: 5.6659
+Epoch [72/100] Loss: 5.6646
+Epoch [73/100] Loss: 5.6527
+Epoch [74/100] Loss: 5.6606
+Epoch [75/100] Loss: 5.6360
+Epoch [76/100] Loss: 5.6601
+Epoch [77/100] Loss: 5.6642
+Epoch [78/100] Loss: 5.6608
+Epoch [79/100] Loss: 5.6738
+Epoch [80/100] Loss: 5.6552
+Epoch [81/100] Loss: 5.6734
+Epoch [82/100] Loss: 5.6613
+Epoch [83/100] Loss: 5.6565
+Epoch [84/100] Loss: 5.6638
+Epoch [85/100] Loss: 5.6667
+Epoch [86/100] Loss: 5.6561
+Epoch [87/100] Loss: 5.6608
+Epoch [88/100] Loss: 5.6647
+Epoch [89/100] Loss: 5.6697
+Epoch [90/100] Loss: 5.6398
+Epoch [91/100] Loss: 5.6599
+Epoch [92/100] Loss: 5.6430
+Epoch [93/100] Loss: 5.6587
+Epoch [94/100] Loss: 5.6365
+Epoch [95/100] Loss: 5.6272
+Epoch [96/100] Loss: 5.6667
+Epoch [97/100] Loss: 5.6478
+Epoch [98/100] Loss: 5.6364
+Epoch [99/100] Loss: 5.6430
+Epoch [100/100] Loss: 5.6525
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 57.97%
+Test Accuracy: 61.68%
+Test Accuracy: 63.01%
+Test Accuracy: 63.60%
+Test Accuracy: 64.94%
+Test Accuracy: 65.44%
+Test Accuracy: 65.48%
+Test Accuracy: 66.08%
+Test Accuracy: 66.12%
+Test Accuracy: 66.53%
+Test Accuracy: 66.56%
+Test Accuracy: 66.66%
+Test Accuracy: 66.75%
+Test Accuracy: 67.00%
+Test Accuracy: 67.24%
+Test Accuracy: 67.40%
+Test Accuracy: 67.56%
+Test Accuracy: 67.57%
+Test Accuracy: 67.36%
+Test Accuracy: 67.47%
+Test Accuracy: 67.65%
+Test Accuracy: 67.76%
+Test Accuracy: 67.64%
+Test Accuracy: 68.03%
+Test Accuracy: 68.15%
+Test Accuracy: 67.85%
+Test Accuracy: 67.91%
+Test Accuracy: 67.88%
+Test Accuracy: 68.18%
+Test Accuracy: 68.09%
+Test Accuracy: 68.31%
+Test Accuracy: 67.99%
+Test Accuracy: 68.31%
+Test Accuracy: 68.24%
+Test Accuracy: 68.20%
+Test Accuracy: 68.14%
+Test Accuracy: 68.05%
+Test Accuracy: 68.16%
+Test Accuracy: 68.19%
+Test Accuracy: 68.24%
+Test Accuracy: 68.02%
+Test Accuracy: 68.39%
+Test Accuracy: 68.34%
+Test Accuracy: 68.13%
+Test Accuracy: 68.39%
+Test Accuracy: 68.32%
+Test Accuracy: 68.22%
+Test Accuracy: 68.14%
+Test Accuracy: 68.30%
+Test Accuracy: 68.23%
+
+==== Training with Augmentation: strong ====
+Epoch [1/100] Loss: 8.8011
+Epoch [2/100] Loss: 8.1206
+Epoch [3/100] Loss: 7.9497
+Epoch [4/100] Loss: 7.7996
+Epoch [5/100] Loss: 7.7347
+Epoch [6/100] Loss: 7.6726
+Epoch [7/100] Loss: 7.6501
+Epoch [8/100] Loss: 7.6418
+Epoch [9/100] Loss: 7.6041
+Epoch [10/100] Loss: 7.5828
+Epoch [11/100] Loss: 7.5481
+Epoch [12/100] Loss: 7.5589
+Epoch [13/100] Loss: 7.4918
+Epoch [14/100] Loss: 7.4911
+Epoch [15/100] Loss: 7.4699
+Epoch [16/100] Loss: 7.4783
+Epoch [17/100] Loss: 7.4237
+Epoch [18/100] Loss: 7.4484
+Epoch [19/100] Loss: 7.3964
+Epoch [20/100] Loss: 7.4326
+Epoch [21/100] Loss: 7.4087
+Epoch [22/100] Loss: 7.4119
+Epoch [23/100] Loss: 7.3651
+Epoch [24/100] Loss: 7.3726
+Epoch [25/100] Loss: 7.3661
+Epoch [26/100] Loss: 7.3460
+Epoch [27/100] Loss: 7.3527
+Epoch [28/100] Loss: 7.3318
+Epoch [29/100] Loss: 7.3299
+Epoch [30/100] Loss: 7.3317
+Epoch [31/100] Loss: 7.3226
+Epoch [32/100] Loss: 7.3299
+Epoch [33/100] Loss: 7.3108
+Epoch [34/100] Loss: 7.3243
+Epoch [35/100] Loss: 7.3007
+Epoch [36/100] Loss: 7.2804
+Epoch [37/100] Loss: 7.3181
+Epoch [38/100] Loss: 7.3036
+Epoch [39/100] Loss: 7.2875
+Epoch [40/100] Loss: 7.2781
+Epoch [41/100] Loss: 7.2475
+Epoch [42/100] Loss: 7.2639
+Epoch [43/100] Loss: 7.2899
+Epoch [44/100] Loss: 7.2756
+Epoch [45/100] Loss: 7.2440
+Epoch [46/100] Loss: 7.2355
+Epoch [47/100] Loss: 7.2478
+Epoch [48/100] Loss: 7.2724
+Epoch [49/100] Loss: 7.2507
+Epoch [50/100] Loss: 7.2506
+Epoch [51/100] Loss: 7.2322
+Epoch [52/100] Loss: 7.2518
+Epoch [53/100] Loss: 7.2597
+Epoch [54/100] Loss: 7.2463
+Epoch [55/100] Loss: 7.2480
+Epoch [56/100] Loss: 7.2207
+Epoch [57/100] Loss: 7.2117
+Epoch [58/100] Loss: 7.2128
+Epoch [59/100] Loss: 7.2052
+Epoch [60/100] Loss: 7.2055
+Epoch [61/100] Loss: 7.2083
+Epoch [62/100] Loss: 7.2152
+Epoch [63/100] Loss: 7.1995
+Epoch [64/100] Loss: 7.1966
+Epoch [65/100] Loss: 7.1963
+Epoch [66/100] Loss: 7.2062
+Epoch [67/100] Loss: 7.2059
+Epoch [68/100] Loss: 7.1887
+Epoch [69/100] Loss: 7.2054
+Epoch [70/100] Loss: 7.1870
+Epoch [71/100] Loss: 7.2109
+Epoch [72/100] Loss: 7.1907
+Epoch [73/100] Loss: 7.1678
+Epoch [74/100] Loss: 7.1720
+Epoch [75/100] Loss: 7.1977
+Epoch [76/100] Loss: 7.1829
+Epoch [77/100] Loss: 7.1784
+Epoch [78/100] Loss: 7.1830
+Epoch [79/100] Loss: 7.1721
+Epoch [80/100] Loss: 7.1768
+Epoch [81/100] Loss: 7.1878
+Epoch [82/100] Loss: 7.1475
+Epoch [83/100] Loss: 7.1614
+Epoch [84/100] Loss: 7.1625
+Epoch [85/100] Loss: 7.1641
+Epoch [86/100] Loss: 7.1402
+Epoch [87/100] Loss: 7.1637
+Epoch [88/100] Loss: 7.1523
+Epoch [89/100] Loss: 7.1636
+Epoch [90/100] Loss: 7.1434
+Epoch [91/100] Loss: 7.1694
+Epoch [92/100] Loss: 7.1649
+Epoch [93/100] Loss: 7.1607
+Epoch [94/100] Loss: 7.1444
+Epoch [95/100] Loss: 7.1450
+Epoch [96/100] Loss: 7.1349
+Epoch [97/100] Loss: 7.1294
+Epoch [98/100] Loss: 7.1416
+Epoch [99/100] Loss: 7.1339
+Epoch [100/100] Loss: 7.1419
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 57.94%
+Test Accuracy: 61.28%
+Test Accuracy: 63.09%
+Test Accuracy: 64.08%
+Test Accuracy: 64.83%
+Test Accuracy: 65.24%
+Test Accuracy: 65.73%
+Test Accuracy: 65.99%
+Test Accuracy: 66.15%
+Test Accuracy: 66.00%
+Test Accuracy: 66.60%
+Test Accuracy: 67.00%
+Test Accuracy: 66.36%
+Test Accuracy: 66.84%
+Test Accuracy: 66.82%
+Test Accuracy: 67.37%
+Test Accuracy: 67.34%
+Test Accuracy: 67.27%
+Test Accuracy: 67.77%
+Test Accuracy: 67.21%
+Test Accuracy: 67.53%
+Test Accuracy: 67.46%
+Test Accuracy: 67.66%
+Test Accuracy: 67.47%
+Test Accuracy: 67.50%
+Test Accuracy: 67.83%
+Test Accuracy: 67.78%
+Test Accuracy: 68.16%
+Test Accuracy: 67.67%
+Test Accuracy: 68.02%
+Test Accuracy: 67.82%
+Test Accuracy: 68.11%
+Test Accuracy: 67.83%
+Test Accuracy: 68.02%
+Test Accuracy: 67.65%
+Test Accuracy: 68.17%
+Test Accuracy: 68.22%
+Test Accuracy: 67.95%
+Test Accuracy: 67.92%
+Test Accuracy: 67.99%
+Test Accuracy: 68.17%
+Test Accuracy: 68.16%
+Test Accuracy: 68.13%
+Test Accuracy: 68.45%
+Test Accuracy: 68.13%
+Test Accuracy: 68.44%
+Test Accuracy: 68.27%
+Test Accuracy: 68.26%
+Test Accuracy: 68.05%
+Test Accuracy: 68.09%
+
+==== Training with Projection Head: mlp_bn ====
+Epoch [1/100] Loss: 6.6844
+Epoch [2/100] Loss: 3.9664
+Epoch [3/100] Loss: 3.4505
+Epoch [4/100] Loss: 3.2173
+Epoch [5/100] Loss: 3.0562
+Epoch [6/100] Loss: 2.9736
+Epoch [7/100] Loss: 2.8739
+Epoch [8/100] Loss: 2.8180
+Epoch [9/100] Loss: 2.7482
+Epoch [10/100] Loss: 2.7027
+Epoch [11/100] Loss: 2.6661
+Epoch [12/100] Loss: 2.6465
+Epoch [13/100] Loss: 2.6239
+Epoch [14/100] Loss: 2.6001
+Epoch [15/100] Loss: 2.5761
+Epoch [16/100] Loss: 2.5605
+Epoch [17/100] Loss: 2.5529
+Epoch [18/100] Loss: 2.5365
+Epoch [19/100] Loss: 2.5351
+Epoch [20/100] Loss: 2.5150
+Epoch [21/100] Loss: 2.5139
+Epoch [22/100] Loss: 2.4941
+Epoch [23/100] Loss: 2.4807
+Epoch [24/100] Loss: 2.4793
+Epoch [25/100] Loss: 2.4622
+Epoch [26/100] Loss: 2.4609
+Epoch [27/100] Loss: 2.4516
+Epoch [28/100] Loss: 2.4497
+Epoch [29/100] Loss: 2.4186
+Epoch [30/100] Loss: 2.4343
+Epoch [31/100] Loss: 2.4095
+Epoch [32/100] Loss: 2.3993
+Epoch [33/100] Loss: 2.4019
+Epoch [34/100] Loss: 2.3942
+Epoch [35/100] Loss: 2.3836
+Epoch [36/100] Loss: 2.3799
+Epoch [37/100] Loss: 2.3754
+Epoch [38/100] Loss: 2.3639
+Epoch [39/100] Loss: 2.3642
+Epoch [40/100] Loss: 2.3523
+Epoch [41/100] Loss: 2.3452
+Epoch [42/100] Loss: 2.3344
+Epoch [43/100] Loss: 2.3307
+Epoch [44/100] Loss: 2.3275
+Epoch [45/100] Loss: 2.3208
+Epoch [46/100] Loss: 2.3215
+Epoch [47/100] Loss: 2.3111
+Epoch [48/100] Loss: 2.2936
+Epoch [49/100] Loss: 2.2914
+Epoch [50/100] Loss: 2.2872
+Epoch [51/100] Loss: 2.2807
+Epoch [52/100] Loss: 2.2822
+Epoch [53/100] Loss: 2.2750
+Epoch [54/100] Loss: 2.2738
+Epoch [55/100] Loss: 2.2641
+Epoch [56/100] Loss: 2.2608
+Epoch [57/100] Loss: 2.2565
+Epoch [58/100] Loss: 2.2425
+Epoch [59/100] Loss: 2.2499
+Epoch [60/100] Loss: 2.2392
+Epoch [61/100] Loss: 2.2418
+Epoch [62/100] Loss: 2.2239
+Epoch [63/100] Loss: 2.2221
+Epoch [64/100] Loss: 2.2287
+Epoch [65/100] Loss: 2.2198
+Epoch [66/100] Loss: 2.2144
+Epoch [67/100] Loss: 2.2139
+Epoch [68/100] Loss: 2.2059
+Epoch [69/100] Loss: 2.2046
+Epoch [70/100] Loss: 2.2063
+Epoch [71/100] Loss: 2.1937
+Epoch [72/100] Loss: 2.1897
+Epoch [73/100] Loss: 2.1795
+Epoch [74/100] Loss: 2.1833
+Epoch [75/100] Loss: 2.1827
+Epoch [76/100] Loss: 2.1751
+Epoch [77/100] Loss: 2.1774
+Epoch [78/100] Loss: 2.1666
+Epoch [79/100] Loss: 2.1725
+Epoch [80/100] Loss: 2.1573
+Epoch [81/100] Loss: 2.1628
+Epoch [82/100] Loss: 2.1604
+Epoch [83/100] Loss: 2.1503
+Epoch [84/100] Loss: 2.1521
+Epoch [85/100] Loss: 2.1477
+Epoch [86/100] Loss: 2.1447
+Epoch [87/100] Loss: 2.1416
+Epoch [88/100] Loss: 2.1378
+Epoch [89/100] Loss: 2.1410
+Epoch [90/100] Loss: 2.1422
+Epoch [91/100] Loss: 2.1340
+Epoch [92/100] Loss: 2.1321
+Epoch [93/100] Loss: 2.1293
+Epoch [94/100] Loss: 2.1227
+Epoch [95/100] Loss: 2.1215
+Epoch [96/100] Loss: 2.1118
+Epoch [97/100] Loss: 2.1193
+Epoch [98/100] Loss: 2.1169
+Epoch [99/100] Loss: 2.1110
+Epoch [100/100] Loss: 2.1091
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 57.66%
+Test Accuracy: 61.03%
+Test Accuracy: 62.89%
+Test Accuracy: 63.90%
+Test Accuracy: 64.56%
+Test Accuracy: 64.74%
+Test Accuracy: 65.68%
+Test Accuracy: 65.84%
+Test Accuracy: 66.17%
+Test Accuracy: 66.74%
+Test Accuracy: 66.39%
+Test Accuracy: 66.64%
+Test Accuracy: 66.95%
+Test Accuracy: 67.11%
+Test Accuracy: 67.16%
+Test Accuracy: 67.37%
+Test Accuracy: 67.32%
+Test Accuracy: 67.38%
+Test Accuracy: 67.58%
+Test Accuracy: 67.80%
+Test Accuracy: 67.85%
+Test Accuracy: 67.50%
+Test Accuracy: 67.66%
+Test Accuracy: 67.51%
+Test Accuracy: 67.63%
+Test Accuracy: 68.02%
+Test Accuracy: 67.50%
+Test Accuracy: 67.93%
+Test Accuracy: 68.18%
+Test Accuracy: 67.83%
+Test Accuracy: 68.16%
+Test Accuracy: 67.90%
+Test Accuracy: 67.97%
+Test Accuracy: 68.21%
+Test Accuracy: 68.06%
+Test Accuracy: 68.06%
+Test Accuracy: 68.28%
+Test Accuracy: 68.42%
+Test Accuracy: 67.95%
+Test Accuracy: 68.41%
+Test Accuracy: 67.84%
+Test Accuracy: 68.12%
+Test Accuracy: 68.22%
+Test Accuracy: 68.28%
+Test Accuracy: 68.34%
+Test Accuracy: 68.29%
+Test Accuracy: 68.21%
+Test Accuracy: 68.46%
+Test Accuracy: 68.34%
+Test Accuracy: 68.36%
+
+==== Training with Projection Head: mlp_no_bn ====
+Epoch [1/100] Loss: 8.3550
+Epoch [2/100] Loss: 5.5229
+Epoch [3/100] Loss: 4.1496
+Epoch [4/100] Loss: 3.6597
+Epoch [5/100] Loss: 3.3730
+Epoch [6/100] Loss: 3.1989
+Epoch [7/100] Loss: 3.0404
+Epoch [8/100] Loss: 2.9463
+Epoch [9/100] Loss: 2.8775
+Epoch [10/100] Loss: 2.8021
+Epoch [11/100] Loss: 2.7616
+Epoch [12/100] Loss: 2.7226
+Epoch [13/100] Loss: 2.6951
+Epoch [14/100] Loss: 2.6472
+Epoch [15/100] Loss: 2.6396
+Epoch [16/100] Loss: 2.6224
+Epoch [17/100] Loss: 2.5896
+Epoch [18/100] Loss: 2.5824
+Epoch [19/100] Loss: 2.5620
+Epoch [20/100] Loss: 2.5470
+Epoch [21/100] Loss: 2.5387
+Epoch [22/100] Loss: 2.5227
+Epoch [23/100] Loss: 2.5034
+Epoch [24/100] Loss: 2.4905
+Epoch [25/100] Loss: 2.4919
+Epoch [26/100] Loss: 2.4823
+Epoch [27/100] Loss: 2.4682
+Epoch [28/100] Loss: 2.4616
+Epoch [29/100] Loss: 2.4510
+Epoch [30/100] Loss: 2.4458
+Epoch [31/100] Loss: 2.4273
+Epoch [32/100] Loss: 2.4224
+Epoch [33/100] Loss: 2.4174
+Epoch [34/100] Loss: 2.4039
+Epoch [35/100] Loss: 2.3955
+Epoch [36/100] Loss: 2.3892
+Epoch [37/100] Loss: 2.3874
+Epoch [38/100] Loss: 2.3749
+Epoch [39/100] Loss: 2.3663
+Epoch [40/100] Loss: 2.3698
+Epoch [41/100] Loss: 2.3482
+Epoch [42/100] Loss: 2.3583
+Epoch [43/100] Loss: 2.3515
+Epoch [44/100] Loss: 2.3317
+Epoch [45/100] Loss: 2.3263
+Epoch [46/100] Loss: 2.3325
+Epoch [47/100] Loss: 2.3246
+Epoch [48/100] Loss: 2.3190
+Epoch [49/100] Loss: 2.3013
+Epoch [50/100] Loss: 2.2978
+Epoch [51/100] Loss: 2.3048
+Epoch [52/100] Loss: 2.2871
+Epoch [53/100] Loss: 2.2871
+Epoch [54/100] Loss: 2.2804
+Epoch [55/100] Loss: 2.2824
+Epoch [56/100] Loss: 2.2701
+Epoch [57/100] Loss: 2.2652
+Epoch [58/100] Loss: 2.2624
+Epoch [59/100] Loss: 2.2657
+Epoch [60/100] Loss: 2.2540
+Epoch [61/100] Loss: 2.2462
+Epoch [62/100] Loss: 2.2375
+Epoch [63/100] Loss: 2.2361
+Epoch [64/100] Loss: 2.2383
+Epoch [65/100] Loss: 2.2333
+Epoch [66/100] Loss: 2.2197
+Epoch [67/100] Loss: 2.2275
+Epoch [68/100] Loss: 2.2179
+Epoch [69/100] Loss: 2.2151
+Epoch [70/100] Loss: 2.2175
+Epoch [71/100] Loss: 2.2085
+Epoch [72/100] Loss: 2.2092
+Epoch [73/100] Loss: 2.2119
+Epoch [74/100] Loss: 2.2040
+Epoch [75/100] Loss: 2.2009
+Epoch [76/100] Loss: 2.1903
+Epoch [77/100] Loss: 2.1946
+Epoch [78/100] Loss: 2.1839
+Epoch [79/100] Loss: 2.1839
+Epoch [80/100] Loss: 2.1839
+Epoch [81/100] Loss: 2.1768
+Epoch [82/100] Loss: 2.1765
+Epoch [83/100] Loss: 2.1745
+Epoch [84/100] Loss: 2.1732
+Epoch [85/100] Loss: 2.1704
+Epoch [86/100] Loss: 2.1649
+Epoch [87/100] Loss: 2.1574
+Epoch [88/100] Loss: 2.1596
+Epoch [89/100] Loss: 2.1531
+Epoch [90/100] Loss: 2.1519
+Epoch [91/100] Loss: 2.1601
+Epoch [92/100] Loss: 2.1413
+Epoch [93/100] Loss: 2.1448
+Epoch [94/100] Loss: 2.1408
+Epoch [95/100] Loss: 2.1433
+Epoch [96/100] Loss: 2.1375
+Epoch [97/100] Loss: 2.1381
+Epoch [98/100] Loss: 2.1304
+Epoch [99/100] Loss: 2.1415
+Epoch [100/100] Loss: 2.1397
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 56.03%
+Test Accuracy: 59.24%
+Test Accuracy: 61.09%
+Test Accuracy: 61.45%
+Test Accuracy: 62.42%
+Test Accuracy: 62.56%
+Test Accuracy: 62.87%
+Test Accuracy: 63.21%
+Test Accuracy: 63.53%
+Test Accuracy: 63.97%
+Test Accuracy: 63.80%
+Test Accuracy: 63.98%
+Test Accuracy: 64.23%
+Test Accuracy: 64.53%
+Test Accuracy: 64.39%
+Test Accuracy: 64.74%
+Test Accuracy: 64.70%
+Test Accuracy: 64.49%
+Test Accuracy: 64.25%
+Test Accuracy: 64.45%
+Test Accuracy: 65.04%
+Test Accuracy: 64.81%
+Test Accuracy: 65.00%
+Test Accuracy: 65.24%
+Test Accuracy: 65.25%
+Test Accuracy: 64.83%
+Test Accuracy: 65.06%
+Test Accuracy: 65.11%
+Test Accuracy: 64.75%
+Test Accuracy: 65.05%
+Test Accuracy: 65.28%
+Test Accuracy: 65.06%
+Test Accuracy: 65.08%
+Test Accuracy: 65.63%
+Test Accuracy: 65.34%
+Test Accuracy: 65.48%
+Test Accuracy: 65.09%
+Test Accuracy: 65.25%
+Test Accuracy: 65.43%
+Test Accuracy: 65.37%
+Test Accuracy: 65.19%
+Test Accuracy: 65.26%
+Test Accuracy: 65.24%
+Test Accuracy: 65.58%
+Test Accuracy: 65.51%
+Test Accuracy: 65.56%
+Test Accuracy: 65.74%
+Test Accuracy: 65.56%
+Test Accuracy: 65.45%
+Test Accuracy: 65.54%
+
+==== Training with Projection Head: linear ====
+Epoch [1/100] Loss: 7.2656
+Epoch [2/100] Loss: 3.9901
+Epoch [3/100] Loss: 3.3969
+Epoch [4/100] Loss: 3.1160
+Epoch [5/100] Loss: 2.9902
+Epoch [6/100] Loss: 2.9063
+Epoch [7/100] Loss: 2.8417
+Epoch [8/100] Loss: 2.7833
+Epoch [9/100] Loss: 2.7476
+Epoch [10/100] Loss: 2.6867
+Epoch [11/100] Loss: 2.6473
+Epoch [12/100] Loss: 2.6291
+Epoch [13/100] Loss: 2.5938
+Epoch [14/100] Loss: 2.5774
+Epoch [15/100] Loss: 2.5625
+Epoch [16/100] Loss: 2.5529
+Epoch [17/100] Loss: 2.5429
+Epoch [18/100] Loss: 2.5287
+Epoch [19/100] Loss: 2.5027
+Epoch [20/100] Loss: 2.5021
+Epoch [21/100] Loss: 2.4968
+Epoch [22/100] Loss: 2.4731
+Epoch [23/100] Loss: 2.4691
+Epoch [24/100] Loss: 2.4575
+Epoch [25/100] Loss: 2.4508
+Epoch [26/100] Loss: 2.4416
+Epoch [27/100] Loss: 2.4333
+Epoch [28/100] Loss: 2.4409
+Epoch [29/100] Loss: 2.4205
+Epoch [30/100] Loss: 2.4134
+Epoch [31/100] Loss: 2.4058
+Epoch [32/100] Loss: 2.4018
+Epoch [33/100] Loss: 2.3933
+Epoch [34/100] Loss: 2.3983
+Epoch [35/100] Loss: 2.3835
+Epoch [36/100] Loss: 2.3726
+Epoch [37/100] Loss: 2.3682
+Epoch [38/100] Loss: 2.3527
+Epoch [39/100] Loss: 2.3639
+Epoch [40/100] Loss: 2.3566
+Epoch [41/100] Loss: 2.3414
+Epoch [42/100] Loss: 2.3364
+Epoch [43/100] Loss: 2.3281
+Epoch [44/100] Loss: 2.3334
+Epoch [45/100] Loss: 2.3205
+Epoch [46/100] Loss: 2.3023
+Epoch [47/100] Loss: 2.2975
+Epoch [48/100] Loss: 2.2976
+Epoch [49/100] Loss: 2.2995
+Epoch [50/100] Loss: 2.2883
+Epoch [51/100] Loss: 2.2838
+Epoch [52/100] Loss: 2.2846
+Epoch [53/100] Loss: 2.2797
+Epoch [54/100] Loss: 2.2688
+Epoch [55/100] Loss: 2.2743
+Epoch [56/100] Loss: 2.2583
+Epoch [57/100] Loss: 2.2624
+Epoch [58/100] Loss: 2.2475
+Epoch [59/100] Loss: 2.2482
+Epoch [60/100] Loss: 2.2377
+Epoch [61/100] Loss: 2.2331
+Epoch [62/100] Loss: 2.2267
+Epoch [63/100] Loss: 2.2316
+Epoch [64/100] Loss: 2.2209
+Epoch [65/100] Loss: 2.2283
+Epoch [66/100] Loss: 2.2261
+Epoch [67/100] Loss: 2.2218
+Epoch [68/100] Loss: 2.2036
+Epoch [69/100] Loss: 2.2156
+Epoch [70/100] Loss: 2.2075
+Epoch [71/100] Loss: 2.2036
+Epoch [72/100] Loss: 2.1985
+Epoch [73/100] Loss: 2.1957
+Epoch [74/100] Loss: 2.1918
+Epoch [75/100] Loss: 2.1889
+Epoch [76/100] Loss: 2.1916
+Epoch [77/100] Loss: 2.1908
+Epoch [78/100] Loss: 2.1835
+Epoch [79/100] Loss: 2.1847
+Epoch [80/100] Loss: 2.1778
+Epoch [81/100] Loss: 2.1622
+Epoch [82/100] Loss: 2.1663
+Epoch [83/100] Loss: 2.1663
+Epoch [84/100] Loss: 2.1672
+Epoch [85/100] Loss: 2.1601
+Epoch [86/100] Loss: 2.1615
+Epoch [87/100] Loss: 2.1567
+Epoch [88/100] Loss: 2.1510
+Epoch [89/100] Loss: 2.1554
+Epoch [90/100] Loss: 2.1492
+Epoch [91/100] Loss: 2.1380
+Epoch [92/100] Loss: 2.1417
+Epoch [93/100] Loss: 2.1403
+Epoch [94/100] Loss: 2.1460
+Epoch [95/100] Loss: 2.1322
+Epoch [96/100] Loss: 2.1331
+Epoch [97/100] Loss: 2.1355
+Epoch [98/100] Loss: 2.1336
+Epoch [99/100] Loss: 2.1315
+Epoch [100/100] Loss: 2.1325
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 52.65%
+Test Accuracy: 56.26%
+Test Accuracy: 57.91%
+Test Accuracy: 58.88%
+Test Accuracy: 59.64%
+Test Accuracy: 60.15%
+Test Accuracy: 60.38%
+Test Accuracy: 60.54%
+Test Accuracy: 60.75%
+Test Accuracy: 61.72%
+Test Accuracy: 61.11%
+Test Accuracy: 61.20%
+Test Accuracy: 61.47%
+Test Accuracy: 61.84%
+Test Accuracy: 61.78%
+Test Accuracy: 61.81%
+Test Accuracy: 62.09%
+Test Accuracy: 61.62%
+Test Accuracy: 61.93%
+Test Accuracy: 62.18%
+Test Accuracy: 61.91%
+Test Accuracy: 62.10%
+Test Accuracy: 62.19%
+Test Accuracy: 62.27%
+Test Accuracy: 62.13%
+Test Accuracy: 62.30%
+Test Accuracy: 62.52%
+Test Accuracy: 62.29%
+Test Accuracy: 62.37%
+Test Accuracy: 62.32%
+Test Accuracy: 62.47%
+Test Accuracy: 62.51%
+Test Accuracy: 62.45%
+Test Accuracy: 62.14%
+Test Accuracy: 62.62%
+Test Accuracy: 62.24%
+Test Accuracy: 62.78%
+Test Accuracy: 62.60%
+Test Accuracy: 62.54%
+Test Accuracy: 62.21%
+Test Accuracy: 62.31%
+Test Accuracy: 62.31%
+Test Accuracy: 62.34%
+Test Accuracy: 62.78%
+Test Accuracy: 62.51%
+Test Accuracy: 62.50%
+Test Accuracy: 62.58%
+Test Accuracy: 62.54%
+Test Accuracy: 62.46%
+Test Accuracy: 62.85%
+
+==== Training with Projection Head: none ====
+Epoch [1/100] Loss: 5.2140
+Epoch [2/100] Loss: 3.7066
+Epoch [3/100] Loss: 3.3965
+Epoch [4/100] Loss: 3.2498
+Epoch [5/100] Loss: 3.1216
+Epoch [6/100] Loss: 3.0386
+Epoch [7/100] Loss: 2.9888
+Epoch [8/100] Loss: 2.9258
+Epoch [9/100] Loss: 2.8736
+Epoch [10/100] Loss: 2.8180
+Epoch [11/100] Loss: 2.7986
+Epoch [12/100] Loss: 2.7623
+Epoch [13/100] Loss: 2.7514
+Epoch [14/100] Loss: 2.7304
+Epoch [15/100] Loss: 2.7033
+Epoch [16/100] Loss: 2.6938
+Epoch [17/100] Loss: 2.6794
+Epoch [18/100] Loss: 2.6681
+Epoch [19/100] Loss: 2.6403
+Epoch [20/100] Loss: 2.6332
+Epoch [21/100] Loss: 2.6272
+Epoch [22/100] Loss: 2.6093
+Epoch [23/100] Loss: 2.6052
+Epoch [24/100] Loss: 2.6008
+Epoch [25/100] Loss: 2.5870
+Epoch [26/100] Loss: 2.5799
+Epoch [27/100] Loss: 2.5693
+Epoch [28/100] Loss: 2.5664
+Epoch [29/100] Loss: 2.5507
+Epoch [30/100] Loss: 2.5457
+Epoch [31/100] Loss: 2.5425
+Epoch [32/100] Loss: 2.5158
+Epoch [33/100] Loss: 2.5101
+Epoch [34/100] Loss: 2.5138
+Epoch [35/100] Loss: 2.5117
+Epoch [36/100] Loss: 2.4968
+Epoch [37/100] Loss: 2.4922
+Epoch [38/100] Loss: 2.4870
+Epoch [39/100] Loss: 2.4811
+Epoch [40/100] Loss: 2.4734
+Epoch [41/100] Loss: 2.4751
+Epoch [42/100] Loss: 2.4671
+Epoch [43/100] Loss: 2.4453
+Epoch [44/100] Loss: 2.4518
+Epoch [45/100] Loss: 2.4456
+Epoch [46/100] Loss: 2.4445
+Epoch [47/100] Loss: 2.4284
+Epoch [48/100] Loss: 2.4265
+Epoch [49/100] Loss: 2.4256
+Epoch [50/100] Loss: 2.4295
+Epoch [51/100] Loss: 2.4088
+Epoch [52/100] Loss: 2.4042
+Epoch [53/100] Loss: 2.4054
+Epoch [54/100] Loss: 2.4029
+Epoch [55/100] Loss: 2.4014
+Epoch [56/100] Loss: 2.3942
+Epoch [57/100] Loss: 2.3892
+Epoch [58/100] Loss: 2.3919
+Epoch [59/100] Loss: 2.3796
+Epoch [60/100] Loss: 2.3862
+Epoch [61/100] Loss: 2.3703
+Epoch [62/100] Loss: 2.3690
+Epoch [63/100] Loss: 2.3664
+Epoch [64/100] Loss: 2.3581
+Epoch [65/100] Loss: 2.3563
+Epoch [66/100] Loss: 2.3537
+Epoch [67/100] Loss: 2.3502
+Epoch [68/100] Loss: 2.3457
+Epoch [69/100] Loss: 2.3414
+Epoch [70/100] Loss: 2.3440
+Epoch [71/100] Loss: 2.3337
+Epoch [72/100] Loss: 2.3304
+Epoch [73/100] Loss: 2.3340
+Epoch [74/100] Loss: 2.3240
+Epoch [75/100] Loss: 2.3191
+Epoch [76/100] Loss: 2.3154
+Epoch [77/100] Loss: 2.3128
+Epoch [78/100] Loss: 2.3167
+Epoch [79/100] Loss: 2.3105
+Epoch [80/100] Loss: 2.3023
+Epoch [81/100] Loss: 2.3074
+Epoch [82/100] Loss: 2.3072
+Epoch [83/100] Loss: 2.2901
+Epoch [84/100] Loss: 2.2984
+Epoch [85/100] Loss: 2.2785
+Epoch [86/100] Loss: 2.2936
+Epoch [87/100] Loss: 2.2877
+Epoch [88/100] Loss: 2.2846
+Epoch [89/100] Loss: 2.2822
+Epoch [90/100] Loss: 2.2829
+Epoch [91/100] Loss: 2.2699
+Epoch [92/100] Loss: 2.2719
+Epoch [93/100] Loss: 2.2654
+Epoch [94/100] Loss: 2.2614
+Epoch [95/100] Loss: 2.2629
+Epoch [96/100] Loss: 2.2731
+Epoch [97/100] Loss: 2.2612
+Epoch [98/100] Loss: 2.2633
+Epoch [99/100] Loss: 2.2518
+Epoch [100/100] Loss: 2.2619
+
+=== Starting Linear Evaluation ===
+Test Accuracy: 46.02%
+Test Accuracy: 50.57%
+Test Accuracy: 51.68%
+Test Accuracy: 52.66%
+Test Accuracy: 52.99%
+Test Accuracy: 53.73%
+Test Accuracy: 53.47%
+Test Accuracy: 53.39%
+Test Accuracy: 53.70%
+Test Accuracy: 53.92%
+Test Accuracy: 53.88%
+Test Accuracy: 54.08%
+Test Accuracy: 53.69%
+Test Accuracy: 53.77%
+Test Accuracy: 54.20%
+Test Accuracy: 54.16%
+Test Accuracy: 53.73%
+Test Accuracy: 54.06%
+Test Accuracy: 54.04%
+Test Accuracy: 54.06%
+Test Accuracy: 54.27%
+Test Accuracy: 53.90%
+Test Accuracy: 54.07%
+Test Accuracy: 53.96%
+Test Accuracy: 54.23%
+Test Accuracy: 54.24%
+Test Accuracy: 54.01%
+Test Accuracy: 53.95%
+Test Accuracy: 54.25%
+Test Accuracy: 54.08%
+Test Accuracy: 54.21%
+Test Accuracy: 54.21%
+Test Accuracy: 54.32%
+Test Accuracy: 54.18%
+Test Accuracy: 53.91%
+Test Accuracy: 54.11%
+Test Accuracy: 54.00%
+Test Accuracy: 54.49%
+Test Accuracy: 54.29%
+Test Accuracy: 54.13%
+Test Accuracy: 54.01%
+Test Accuracy: 53.96%
+Test Accuracy: 54.17%
+Test Accuracy: 54.00%
+Test Accuracy: 54.07%
+Test Accuracy: 53.98%
+Test Accuracy: 54.31%
+Test Accuracy: 54.29%
+Test Accuracy: 54.08%
+Test Accuracy: 54.24%
