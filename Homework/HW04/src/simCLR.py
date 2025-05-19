@@ -194,8 +194,9 @@ def main():
 		print(f"\n==== Training with Augmentation: {aug_name} ====")
 
 		simclr_dataset = SimCLRDataset(train_data, aug_name)
-		train_loader = DataLoader(simclr_dataset, batch_size=config["batch_size"],
-								  shuffle=True, num_workers=config["num_workers"], drop_last=True)
+		train_loader = DataLoader(
+			simclr_dataset, batch_size=config["batch_size"],
+			shuffle=True, num_workers=config["num_workers"], drop_last=True)
 
 		losses = []
 		for epoch in range(config["epochs"]):
@@ -236,7 +237,9 @@ def main():
 		print(f"\n==== Training with Projection Head: {head_type} ====")
 
 		simclr_dataset = SimCLRDataset(train_data)  # 或其他固定增强方式
-		train_loader = DataLoader(simclr_dataset, ...)
+		train_loader = DataLoader(
+			simclr_dataset, batch_size=config["batch_size"],
+			shuffle=True, num_workers=config["num_workers"], drop_last=True)
 
 		model = SimCLR(projection_dim=config["projection_dim"], head_type=head_type).to(device)
 		optimizer = optim.Adam(model.parameters(), lr=config["lr"])
