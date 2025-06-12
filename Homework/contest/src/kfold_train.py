@@ -1,7 +1,9 @@
+import gc
+
 import nltk
 import pytorch_lightning as pl
 import torch
-torch.set_float32_matmul_precision("medium")
+
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Subset
 
@@ -9,7 +11,7 @@ from dataset import AIDetectorDataset
 from model import AIDetectorModel
 
 
-def kfold_training(jsonl_path, n_splits=5):
+def kfold_training(cached_jsonl_path, n_splits=5):
 	model_name = 'roberta-base'
 	tokenizer_name = model_name
 	batch_size = 16
@@ -17,7 +19,7 @@ def kfold_training(jsonl_path, n_splits=5):
 	feature_dim = 4 + 10  # 之前 simple feature + stylometry feature
 
 	# Load full dataset (with labels)
-	dataset = AIDetectorDataset(jsonl_path, tokenizer_name, max_length=max_length, mode='train')
+	dataset = AIDetectorDataset(cached_jsonl_path, tokenizer_name, max_length=max_length, mode='train')
 
 	# Build label list for stratification
 	labels = [item[1] for item in dataset.samples]
@@ -32,19 +34,13 @@ def kfold_training(jsonl_path, n_splits=5):
 		train_loader = DataLoader(
 			train_subset,
 			batch_size=batch_size,
-			shuffle=True,
-			num_workers=4,
-			persistent_workers=True,
-			pin_memory=True
+			shuffle=True
 		)
 
 		val_loader = DataLoader(
 			val_subset,
 			batch_size=batch_size,
-			shuffle=False,
-			num_workers=4,
-			persistent_workers=True,
-    		pin_memory=True
+			shuffle=False
 		)
 
 		model = AIDetectorModel(model_name=model_name, feature_dim=feature_dim, lr=2e-5)
@@ -72,8 +68,14 @@ def kfold_training(jsonl_path, n_splits=5):
 
 		trainer.fit(model, train_loader, val_loader)
 
+		del model
+		del trainer
+		gc.collect()
+		torch.cuda.empty_cache()
+
 
 if __name__ == '__main__':
+	torch.set_float32_matmul_precision("medium")
 	nltk.download('punkt')
 	nltk.download('averaged_perceptron_tagger_eng')
-	kfold_training('../data/train.jsonl', n_splits=5)
+	kfold_training('../data/cached_train.jsonl', n_splits=5)

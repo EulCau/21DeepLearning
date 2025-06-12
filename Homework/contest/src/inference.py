@@ -1,38 +1,25 @@
 import json
+
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
+
 from model import AIDetectorModel
-from features import stylometry_features
 
 
 # --------------- Dataset ---------------
 class InferenceDataset(Dataset):
-	def __init__(self, jsonl_path, tokenizer_name, max_length=512):
+	def __init__(self, cached_test_jsonl_path, tokenizer_name, max_length=512):
 		self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 		self.max_length = max_length
-
 		self.samples = []
-		with open(jsonl_path, 'r', encoding='utf-8') as f:
+
+		with open(cached_test_jsonl_path, 'r', encoding='utf-8') as f:
 			for line in f:
 				item = json.loads(line)
 				text = item['text']
-				features = self.extract_features(text)
+				features = item['features']
 				self.samples.append((text, features))
-
-	@staticmethod
-	def extract_features(text):
-		# Simple features
-		length = len(text)
-		num_hashes = text.count('#')
-		num_urls = text.count('http')
-		num_lists = text.count('\n- ') + text.count('\n1.') + text.count('\n2.')
-		simple_feats = [length, num_hashes, num_urls, num_lists]
-
-		# Stylometry features
-		styl_feats = stylometry_features(text)
-
-		return simple_feats + styl_feats
 
 	def __len__(self):
 		return len(self.samples)
@@ -55,11 +42,11 @@ class InferenceDataset(Dataset):
 
 
 # --------------- Inference Function ---------------
-def run_inference(model_ckpt_paths, tokenizer_name, test_jsonl_path, output_txt_path):
+def run_inference(model_ckpt_paths, tokenizer_name, cached_test_jsonl_path, output_txt_path):
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	print(f'Using device: {device}')
 
-	dataset = InferenceDataset(test_jsonl_path, tokenizer_name)
+	dataset = InferenceDataset(cached_test_jsonl_path, tokenizer_name)
 	dataloader = DataLoader(dataset, batch_size=16, shuffle=False, num_workers=4)
 
 	all_preds = []
@@ -105,15 +92,15 @@ def run_inference(model_ckpt_paths, tokenizer_name, test_jsonl_path, output_txt_
 if __name__ == '__main__':
 	# Example: using 5-fold models for ensemble
 	model_ckpt_paths_ = [
-		'lightning_logs/fold1-best-checkpoint.ckpt',
-		'lightning_logs/fold2-best-checkpoint.ckpt',
-		'lightning_logs/fold3-best-checkpoint.ckpt',
-		'lightning_logs/fold4-best-checkpoint.ckpt',
-		'lightning_logs/fold5-best-checkpoint.ckpt'
+		'../result/checkpoints/fold1-best-checkpoint.ckpt',
+		'../result/checkpoints/fold2-best-checkpoint.ckpt',
+		'../result/checkpoints/fold3-best-checkpoint.ckpt',
+		'../result/checkpoints/fold4-best-checkpoint.ckpt',
+		'../result/checkpoints/fold5-best-checkpoint.ckpt'
 	]
 
-	tokenizer_name_ = 'roberta-large'
-	test_jsonl_path_ = '../data/testA.jsonl'
-	output_txt_path_ = '../result/submit_testA.json'
+	tokenizer_name_ = 'roberta-base'
+	cached_test_jsonl_path_ = '../data/cached_test.jsonl'
+	output_txt_path_ = '../result/submit.txt'
 
-	run_inference(model_ckpt_paths_, tokenizer_name_, test_jsonl_path_, output_txt_path_)
+	run_inference(model_ckpt_paths_, tokenizer_name_, cached_test_jsonl_path_, output_txt_path_)
