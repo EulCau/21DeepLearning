@@ -1,7 +1,6 @@
-import torch
-from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from torch.utils.data import DataLoader
 
 from dataset import AIDetectorDataset
 from model import AIDetectorModel
@@ -14,7 +13,7 @@ def main():
 	max_length = 512
 	feature_dim = 4  # 对应 extract_features 里定义的特征数量
 
-	train_dataset = AIDetectorDataset('data/train.jsonl', tokenizer_name, max_length=max_length, mode='train')
+	train_dataset = AIDetectorDataset('../data/train.jsonl', tokenizer_name, max_length=max_length, mode='train')
 	val_dataset = AIDetectorDataset('data/val.jsonl', tokenizer_name, max_length=max_length, mode='val')
 
 	train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)

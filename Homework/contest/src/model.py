@@ -23,6 +23,9 @@ class AIDetectorModel(pl.LightningModule):
 		self.loss_fn = nn.CrossEntropyLoss()
 		self.lr = lr
 
+		# 用于保存每个 batch 的预测与标签，供 epoch_end 使用
+		self.validation_step_outputs = []
+
 	def forward(self, input_ids, attention_mask, features):
 		outputs = self.backbone(input_ids=input_ids, attention_mask=attention_mask)
 		pooled_output = outputs.last_hidden_state[:, 0, :]  # [CLS] token
@@ -53,14 +56,22 @@ class AIDetectorModel(pl.LightningModule):
 		labels = batch['label']
 
 		self.log('val_loss', loss, prog_bar=True)
-		return {'preds': preds.cpu(), 'labels': labels.cpu()}
 
-	def validation_epoch_end(self, outputs):
-		preds = torch.cat([x['preds'] for x in outputs])
-		labels = torch.cat([x['labels'] for x in outputs])
+		# 保存 CPU 上的预测和标签
+		self.validation_step_outputs.append({
+			'preds': preds.detach().cpu(),
+			'labels': labels.detach().cpu()
+		})
+
+	def on_validation_epoch_end(self):
+		preds = torch.cat([x['preds'] for x in self.validation_step_outputs])
+		labels = torch.cat([x['labels'] for x in self.validation_step_outputs])
 
 		f1 = f1_score(labels, preds)
 		self.log('val_f1', f1, prog_bar=True)
+
+		# 清空缓存
+		self.validation_step_outputs.clear()
 
 	def configure_optimizers(self):
 		optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)

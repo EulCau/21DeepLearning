@@ -1,16 +1,16 @@
-import json
-import torch
-from torch.utils.data import DataLoader, Subset
+import nltk
 import pytorch_lightning as pl
+import torch
+torch.set_float32_matmul_precision("medium")
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import f1_score
+from torch.utils.data import DataLoader, Subset
 
 from dataset import AIDetectorDataset
 from model import AIDetectorModel
 
 
 def kfold_training(jsonl_path, n_splits=5):
-	model_name = 'roberta-large'
+	model_name = 'roberta-base'
 	tokenizer_name = model_name
 	batch_size = 16
 	max_length = 512
@@ -29,8 +29,23 @@ def kfold_training(jsonl_path, n_splits=5):
 		train_subset = Subset(dataset, train_idx)
 		val_subset = Subset(dataset, val_idx)
 
-		train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4)
-		val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=4)
+		train_loader = DataLoader(
+			train_subset,
+			batch_size=batch_size,
+			shuffle=True,
+			num_workers=4,
+			persistent_workers=True,
+			pin_memory=True
+		)
+
+		val_loader = DataLoader(
+			val_subset,
+			batch_size=batch_size,
+			shuffle=False,
+			num_workers=4,
+			persistent_workers=True,
+    		pin_memory=True
+		)
 
 		model = AIDetectorModel(model_name=model_name, feature_dim=feature_dim, lr=2e-5)
 
@@ -57,6 +72,10 @@ def kfold_training(jsonl_path, n_splits=5):
 
 		trainer.fit(model, train_loader, val_loader)
 
+		break
+
 
 if __name__ == '__main__':
-	kfold_training('data/train.jsonl', n_splits=5)
+	nltk.download('punkt')
+	nltk.download('averaged_perceptron_tagger_eng')
+	kfold_training('../data/train.jsonl', n_splits=5)

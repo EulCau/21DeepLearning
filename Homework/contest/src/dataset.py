@@ -3,6 +3,8 @@ import torch
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
+from features import stylometry_features
+
 
 class AIDetectorDataset(Dataset):
 	def __init__(self, jsonl_path, tokenizer_name, max_length=512, mode='train'):
@@ -19,14 +21,19 @@ class AIDetectorDataset(Dataset):
 				features = self.extract_features(text)
 				self.samples.append((text, label, features))
 
-	def extract_features(self, text):
-		# 你可以扩展更多特征，这里是简单示例：
+	@staticmethod
+	def extract_features(text):
+		# Simple features
 		length = len(text)
 		num_hashes = text.count('#')
 		num_urls = text.count('http')
 		num_lists = text.count('\n- ') + text.count('\n1.') + text.count('\n2.')
+		simple_feats = [length, num_hashes, num_urls, num_lists]
 
-		return [length, num_hashes, num_urls, num_lists]
+		# Stylometry features
+		styl_feats = stylometry_features(text)
+
+		return simple_feats + styl_feats
 
 	def __len__(self):
 		return len(self.samples)
