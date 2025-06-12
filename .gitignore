@@ -5,8 +5,9 @@ Tmp/
 libtorch support/
 Eigen/
 __pycache__/
+lightning_logs/
+.idea/
+.venv/
+.vscode/
 
-.idea
-.venv
-.vscode
 Thumbs.db
