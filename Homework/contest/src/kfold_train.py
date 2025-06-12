@@ -72,8 +72,6 @@ def kfold_training(jsonl_path, n_splits=5):
 
 		trainer.fit(model, train_loader, val_loader)
 
-		break
-
 
 if __name__ == '__main__':
 	nltk.download('punkt')
