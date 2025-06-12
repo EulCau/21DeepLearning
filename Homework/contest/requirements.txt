@@ -8,3 +8,4 @@ tqdm
 nltk
 spacy
 textstat
+hf_xet
