@@ -28,7 +28,7 @@ def evaluate_tta_weights(model_ckpt_paths, tokenizer_name, val_jsonl_path, tta_m
 		aug_texts = [apply_tta(item["text"], tta_mode) for item in val_data]
 
 		# 构造临时文件或直接构造 Dataset
-		tmp_aug_path = "../data/temp_val_aug.jsonl"
+		tmp_aug_path = "../data/temp/temp_val_aug.jsonl"
 		with open(tmp_aug_path, 'w', encoding="utf-8") as f:
 			for text in aug_texts:
 				feats = extract_features(text)
@@ -91,7 +91,7 @@ def run_inference_tta_with_weights(model_ckpt_paths, tokenizer_name, test_jsonl_
 		print(f"--- TTA mode: {tta_mode} ---")
 		aug_texts = [apply_tta(item["text"], tta_mode) for item in raw_data]
 
-		tmp_aug_path = "../data/temp_aug.jsonl"
+		tmp_aug_path = "../data/temp/temp_aug.jsonl"
 		with open(tmp_aug_path, 'w', encoding="utf-8") as f:
 			for text in aug_texts:
 				feats = extract_features(text)
@@ -152,11 +152,10 @@ if __name__ == "__main__":
 	]
 
 	tokenizer_name_ = "roberta-base"
-	val_jsonl_path_ = "../data/train.jsonl"
 	test_jsonl_path_ = "../data/test.jsonl"
 	output_txt_path_ = "../result/submit.txt"
 
-	tta_modes_ = ["lower", "shuffle_sent", "drop_stopwords", "char_noise", "synonym_replace", "shuffle_word", "shuffle_char"]
-	weights = evaluate_tta_weights(model_ckpt_paths_, tokenizer_name_, val_jsonl_path_, tta_modes_)
+	tta_modes_ = ["lower", "shuffle_sent", "shuffle_words", "drop_stopwords", "drop_sentence", "replace_synonym", "char_noise"]
+	weights_ = [1.0, 1.0, 0.47, 1.0, 1.0, 0.36, 1.0]
 
-	run_inference_tta_with_weights(model_ckpt_paths_, tokenizer_name_, test_jsonl_path_, output_txt_path_, tta_modes_, weights)
+	run_inference_tta_with_weights(model_ckpt_paths_, tokenizer_name_, test_jsonl_path_, output_txt_path_, tta_modes_, weights_)
