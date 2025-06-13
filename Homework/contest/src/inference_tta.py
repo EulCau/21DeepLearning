@@ -1,4 +1,6 @@
 import json
+
+import nltk
 import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import roc_auc_score, accuracy_score
@@ -137,6 +139,10 @@ def run_inference_tta_with_weights(model_ckpt_paths, tokenizer_name, test_jsonl_
 
 
 if __name__ == "__main__":
+	nltk.download('punkt')
+	nltk.download('stopwords')
+	nltk.download('wordnet')
+
 	model_ckpt_paths_ = [
 		"../result/checkpoints/fold1-best-checkpoint.ckpt",
 		"../result/checkpoints/fold2-best-checkpoint.ckpt",
