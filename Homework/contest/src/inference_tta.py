@@ -1,15 +1,15 @@
 import json
 
-import nltk
-import torch
-from torch.utils.data import DataLoader
-from sklearn.metrics import roc_auc_score, accuracy_score
 import numpy as np
+import torch
+from sklearn.metrics import roc_auc_score, accuracy_score
+from torch.utils.data import DataLoader
 
 from cache_features import extract_features
 from inference import InferenceDataset
 from model import AIDetectorModel
 from tta_utils import apply_tta
+
 
 def evaluate_tta_weights(model_ckpt_paths, tokenizer_name, val_jsonl_path, tta_modes):
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -71,7 +71,7 @@ def evaluate_tta_weights(model_ckpt_paths, tokenizer_name, val_jsonl_path, tta_m
 	aucs = np.array([roc_auc_score(true_labels, all_preds[mode]) for mode in tta_modes])
 	weights = aucs / aucs.sum()
 
-	print("TTA 模式权重分配（基于验证集 AUC）:")
+	print("TTA 模式权重分配 (基于验证集 AUC):")
 	for mode, w in zip(tta_modes, weights):
 		print(f"  {mode}: {w:.4f}")
 
@@ -139,10 +139,6 @@ def run_inference_tta_with_weights(model_ckpt_paths, tokenizer_name, test_jsonl_
 
 
 if __name__ == "__main__":
-	nltk.download('punkt')
-	nltk.download('stopwords')
-	nltk.download('wordnet')
-
 	model_ckpt_paths_ = [
 		"../result/checkpoints/fold1-best-checkpoint.ckpt",
 		"../result/checkpoints/fold2-best-checkpoint.ckpt",

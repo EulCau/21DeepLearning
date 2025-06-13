@@ -1,9 +1,7 @@
 import gc
 
-import nltk
 import pytorch_lightning as pl
 import torch
-
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Subset
 
@@ -76,6 +74,4 @@ def kfold_training(cached_jsonl_path, n_splits=5):
 
 if __name__ == "__main__":
 	torch.set_float32_matmul_precision("medium")
-	nltk.download("punkt")
-	nltk.download("averaged_perceptron_tagger_eng")
 	kfold_training("../data/cached_train.jsonl", n_splits=5)

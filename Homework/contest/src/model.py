@@ -23,7 +23,7 @@ class AIDetectorModel(pl.LightningModule):
 		self.loss_fn = nn.CrossEntropyLoss()
 		self.lr = lr
 
-		# 用于保存每个 batch 的预测与标签，供 epoch_end 使用
+		# 用于保存每个 batch 的预测与标签, 供 epoch_end 使用
 		self.validation_step_outputs = []
 
 	def forward(self, input_ids, attention_mask, features):
