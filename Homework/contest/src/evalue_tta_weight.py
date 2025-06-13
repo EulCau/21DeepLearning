@@ -135,7 +135,6 @@ def run_inference_tta_with_weights(model_ckpt_paths, tokenizer_name, test_jsonl_
 	print("Done.")
 
 
-
 if __name__ == "__main__":
 	model_ckpt_paths_ = [
 		"../result/checkpoints/fold1-best-checkpoint.ckpt",
@@ -146,11 +145,13 @@ if __name__ == "__main__":
 	]
 
 	tokenizer_name_ = "roberta-base"
-	val_jsonl_path_ = "../data/train.jsonl"
 	test_jsonl_path_ = "../data/test.jsonl"
 	output_txt_path_ = "../result/submit.txt"
 
 	tta_modes_ = ["lower", "shuffle_sent", "drop_stopwords", "char_noise", "synonym_replace", "shuffle_word", "shuffle_char"]
 	weights = evaluate_tta_weights(model_ckpt_paths_, tokenizer_name_, val_jsonl_path_, tta_modes_)
 
-	run_inference_tta_with_weights(model_ckpt_paths_, tokenizer_name_, test_jsonl_path_, output_txt_path_, tta_modes_, weights)
+	# Step2: 在测试集上用权重融合预测
+	run_inference_tta_with_weights(model_ckpt_paths_, tokenizer_name_, test_jsonl_path_, output_txt_path_, tta_modes_,
+								   weights)
+
