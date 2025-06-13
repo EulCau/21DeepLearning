@@ -36,39 +36,39 @@ class AIDetectorModel(pl.LightningModule):
 
 	def training_step(self, batch, batch_idx):
 		logits = self(
-			batch['input_ids'],
-			batch['attention_mask'],
-			batch['features']
+			batch["input_ids"],
+			batch["attention_mask"],
+			batch["features"]
 		)
-		loss = self.loss_fn(logits, batch['label'])
-		self.log('train_loss', loss)
+		loss = self.loss_fn(logits, batch["label"])
+		self.log("train_loss", loss)
 		return loss
 
 	def validation_step(self, batch, batch_idx):
 		logits = self(
-			batch['input_ids'],
-			batch['attention_mask'],
-			batch['features']
+			batch["input_ids"],
+			batch["attention_mask"],
+			batch["features"]
 		)
-		loss = self.loss_fn(logits, batch['label'])
+		loss = self.loss_fn(logits, batch["label"])
 
 		preds = torch.argmax(logits, dim=1)
-		labels = batch['label']
+		labels = batch["label"]
 
-		self.log('val_loss', loss, prog_bar=True)
+		self.log("val_loss", loss, prog_bar=True)
 
 		# 保存 CPU 上的预测和标签
 		self.validation_step_outputs.append({
-			'preds': preds.detach().cpu(),
-			'labels': labels.detach().cpu()
+			"preds": preds.detach().cpu(),
+			"labels": labels.detach().cpu()
 		})
 
 	def on_validation_epoch_end(self):
-		preds = torch.cat([x['preds'] for x in self.validation_step_outputs])
-		labels = torch.cat([x['labels'] for x in self.validation_step_outputs])
+		preds = torch.cat([x["preds"] for x in self.validation_step_outputs])
+		labels = torch.cat([x["labels"] for x in self.validation_step_outputs])
 
 		f1 = f1_score(labels, preds)
-		self.log('val_f1', f1, prog_bar=True)
+		self.log("val_f1", f1, prog_bar=True)
 
 		# 清空缓存
 		self.validation_step_outputs.clear()
