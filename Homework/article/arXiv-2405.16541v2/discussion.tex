@@ -1,0 +1,33 @@
+\vspace{-2mm}
+OT provides a powerful, unifying paradigm for variance reduction with random features.
+It offers perspectives, proof techniques and numerical algorithms for finding novel RF couplings on continuous and discrete input domains, \textbf{substantially beating previous algorithms in both settings and with disparate basis functions}.
+%, including the low-sample, high-dimensional $\mathbb{R}^d$ regime where standard QMC struggles and for random walks on graphs where dependencies are difficult to devise.
+
+\pg{Variance reduction is \emph{not} all you need} Whilst the presence of variance reduction is unambiguous, downstream benefits tell a more nuanced story.
+With GRFs for scalable GPs, variance reduction permits much better approximate inference (Sec.~\ref{sec:graph_gp_experiments}).
+With RFFs and RLFs, this is not the case.
+For instance, when approximating attention in Performers \citep{choromanski2020rethinking}, \emph{maximising} the pointwise kernel estimator  variance -- the `wrong' OT problem -- turns out to improve predictive performance after row normalisation. 
+This shows that, though popular, naive variance reduction is not always the right goal.
+We believe this to be underappreciated in the literature.
+
+\pg{Right framing, wrong cost function}
+Therefore, we posit that OT provides the \emph{right framing} for the problem of coupling RFs, but sometimes pointwise kernel variance is the \emph{wrong cost function}.
+This choice may not fully capture how the \emph{joint} distribution over kernel estimates determines downstream performance. 
+Coupling to optimise e.g.~the spectral properties of \smash{$\widehat{\mathbf{K}}$} \citep{choromanski2018geometry, avron2017random} or the variance of row-normalised attention scores may prove better.
+These objectives are rarely considered in the literature. %, which usually prefers to just consider the base estimator variance.
+Fortunately, OT provides a suite of theoretical and numerical tools achieve this; one simply modifies the cost function in Eq.~\ref{eq:first_ot_formulation}, optimising a different characteristic of the coupling. 
+We hope this research will spur future work in this exciting direction.
+
+
+
+%\pg{Right framing, wrong cost function}
+%The reason for this counterintuitive behaviour is that, even if a coupling guarantees lower variance \emph{pointwise} kernel estimates $\{k(\boldsymbol{x}_i, \boldsymbol{x}_j)\}_{i,j=1}^N$, functions like the predictive mean and KL divergence are highly nonlinear in these estimates. 
+%For example, they may involve inverting a Gram matrix. 
+%It is hard to predict how the bias and variance of these downstream quantities will depend on the pointwise distributions; they are not guaranteed to improve.
+%Couplings that reduce the variance of $k(\boldsymbol{x}_i, \boldsymbol{x}_j)$ and  $k(\boldsymbol{x}_i, \boldsymbol{x}_k)$ often also modify their \emph{covariance}, which may effect estimators that combine them nontrivially. % -- including seemingly innocuous quantities like the KL-divergence from the true to the approximate prior (App.~\ref{app:are_predictions_improved?}).
+%We believe this to be underappreciated in the literature, and give detailed extended discussion in App.~\ref{app:are_predictions_improved?}.
+
+
+
+
+

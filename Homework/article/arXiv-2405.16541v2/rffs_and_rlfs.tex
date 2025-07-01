@@ -1,0 +1,306 @@
+\pg{RFFs and RLFs} To begin, we consider the task of approximating the popular \emph{Gaussian kernel} \smash{$k(\boldsymbol{x}_i,\boldsymbol{x}_j) \coloneqq \exp(-\|\boldsymbol{x}_i - \boldsymbol{x}_j\|^2/2)$} with data \smash{$\{\boldsymbol{x}_i\}_{i=1}^N \subset \mathbb{R}^d$}. 
+This can be achieved using Rahimi and Recht's celebrated \emph{random Fourier features} (RFFs) \citep{rahimi2007random},
+\begin{equation} \label{eq:rff_exp}
+    \phi_\textrm{RFF}(\boldsymbol{x}) = \sqrt{\frac{1}{m}} \left( \odot_{i=1}^m \left [ \sin(\boldsymbol{\omega}_i ^\top \boldsymbol{x}), \cos(\boldsymbol{\omega}_i ^\top \boldsymbol{x})\right]\right), 
+\end{equation} 
+where $\odot$ denotes concatenation. 
+These provide an unbiased estimate if the frequencies $\{ \boldsymbol{\omega}_i\}_{i=1}^m$ are marginally Gaussian, $\boldsymbol{\omega}_i \sim \mathcal{N}(0,\mathbf{I}_d)$.
+RFFs are widely used for scaling kernel methods such as Gaussian processes \citep[GPs;][]{williams2006gaussian} and support vector machines \citep[SVMs;][]{scholkopf2018learning}.
+The time complexity of computing the exact posterior of a GP is $\mathcal{O}(N^3),$ where $N$ is the number of datapoints.
+Using RFFs, one can approximate the posterior with $m \ll N$ features, reducing this cost to $\mathcal{O}(Nm^2)$.
+%Beyond RFFs, 
+Changing basis functions, $k(\boldsymbol{x}_i,\boldsymbol{x}_j)$ can also be approximated using \emph{random Laplace features} (RLFs) \citep{yang2014random},
+\begin{equation} \label{eq:rlf_exp}
+     \phi_\textrm{RLF}(\boldsymbol{x}) = \sqrt{\frac{1}{m}} \exp(-\|\boldsymbol{x}\|^2)( \odot_{i=1}^m \exp(\boldsymbol{\omega}_i^\top \boldsymbol{x})),
+\end{equation}
+where again $\boldsymbol{\omega}_i \sim \mathcal{N}(0,\mathbf{I}_d).$
+Unlike RFFs, RLFs guarantee positive kernel estimates.
+This makes them better suited to approximating attention in efficient transformers \citep{choromanski2020rethinking}, where negative estimates cause training instabilities.
+Using $m$ RLFs to get a low-rank decomposition of attention with $N$ $d$-dimensional tokens, one can reduce the time complexity of transformers from $\mathcal{O}(N^2+Nd)$ to $\mathcal{O}(Nmd)$ with low performance loss.
+
+\pg{Orthogonal random features} 
+A common variance reduction technique for both RFFs and RLFs is the \emph{orthogonality trick} \citep{yu2016orthogonal, rowland2018geometrically,simrfs,choromanski2018geometry}.
+Exploiting the isotropy of $\mathcal{N}(0,\mathbf{I}_d)$, one can constrain the frequency vectors $\{ \boldsymbol{\omega}_i\}_{i=1}^m$ to be exactly orthogonal whilst preserving their marginal distributions.
+This is found to reduce the kernel estimator variance and improve performance in downstream tasks.
+Whilst this technique couples the \emph{directions} of the random frequencies $\{\widehat{\boldsymbol{\omega}}_i\}_{i=1}^m$, their \emph{norms} $\{\omega_i\}_{i=1}^m$ (with $\omega_i \coloneqq \|\boldsymbol{\omega}_i\|_2$) are left independent so the coupling is suboptimal. 
+By solving an OT problem, we will show how coupling the norms can further reduce estimator variance.
+%We will now use tools from OT to find a coupling between frequency vector norms that further reduces the kernel estimator variance.
+
+\subsection{Solving the OT problem for maximal variance reduction} \label{sec:rffs_rlfs_theory}
+Consider an ensemble of $m$ orthogonal random frequency directions $\{\widehat{\boldsymbol{\omega}}_i\}_{i=1}^m$, jointly randomly rotated so they are marginally isotropic. 
+Our task is to couple their norms $\{\omega_i\}_{i=1}^m$ to suppress the RFF and RLF kernel estimator variance.
+The marginal distribution of each $\omega_i$ must be $\chi_d$ (a Chi distribution with $d$ degrees of freedom) to ensure that each $\boldsymbol{\omega}_i$ is marginally Gaussian.
+We can extend recent results by \citet{simrfs} to compute the OT cost functions. 
+
+\begin{lemma}[OT formulation for RFFs and RLFs] \label{lemma:ot_rff_formulation}
+    When estimating $k(\boldsymbol{x},\boldsymbol{y})$ with $m$ orthogonal RFFs and RLFs, the OT formulation of the variance reduction problem is: 
+    \begin{equation} \label{eq:ot_formulation_one}
+    \mu^* = \arg \min_{\mu \in \Lambda_m(\chi_d)} \left [ \mathbb{E}_{\omega_{1:m} \sim \mu}  c(\omega_{1:m}) \right], \quad \textrm{where}
+\end{equation} \vspace{-1mm}
+\begin{equation} \label{eq:cost_functions}
+    c_\textrm{RFF}(\omega_{1:m}) = \sum_{i, j \neq i}^m \sum_{k=0}^\infty \frac{(-1)^k z^{2k} \left( \omega_i^2 + \omega_j^2 \right)^k}{2^{2k} k! \Gamma(k+\frac{d}{2})},  \quad c_\textrm{RLF}(\omega_{1:m}) = \sum_{i, j \neq i}^m \sum_{k=0}^\infty \frac{v^{2k} (\omega_i^2 + \omega_j^2) ^{k}}{2^{2k} k! \Gamma(k+\frac{d}{2})}, 
+\end{equation}
+with $z \coloneqq \|\boldsymbol{x} - \boldsymbol{y}\|_2$ and $v \coloneqq \|\boldsymbol{x} + \boldsymbol{y}\|_2$.
+$\Gamma$ is the gamma function.
+\end{lemma}
+This is a tough multi-marginal OT problem. 
+However, remarkably, we can solve it \emph{exactly}, under mild asymptotic assumptions for RFFs, when $m = 2$.
+The following result is novel.
+
+\begin{theorem}[Solution to OT problem when $m=2$]\label{thm:pairwise_ot_solution}
+Denote by $F_{\chi_d}(\cdot)$ the cumulative distribution function (CDF) of $\chi_d$. 
+Consider $m=2$ orthogonal frequencies with norms $(\omega_1, \omega_2)$.
+For RLFs, the OT problem in Eq.~\ref{eq:ot_formulation_one} is solved by the \emph{negative monotone} coupling
+\begin{equation} \label{eq:negative_monotone_coupling}
+    F_{\chi_d}(\omega_1) + F_{\chi_d}(\omega_2) = 1.
+\end{equation}
+For RFFs, Eq.~\ref{eq:negative_monotone_coupling} ensures lower cost than any other coupling, provided $z$ is sufficiently small.
+\end{theorem}
+\emph{Proof sketch.} We defer a full proof of this important result to App.~\ref{app:main_thm_rff_proof}; here is a brief sketch. % for the interested reader.
+OT plans satisfy a property called `$c$-monotonicity', which specifies how the support of the optimal coupling depends on the cost function. 
+For RLFs, $c_\textrm{RLF}$ immediately implies negative monotonicity (Eq.~\ref{eq:negative_monotone_coupling}).
+For RFFs, this is only true for the first nontrivial term in $z$. 
+By bounding the contribution from the remaining terms, one can show that Eq.~\ref{eq:negative_monotone_coupling} still guarantees lower variance than any other coupling if $z$ is small enough.
+Specifically, letting $\mu_\textrm{NM}$ denote the negative monotone coupling, for any other coupling $\mu' \in \Lambda_2(\eta) \backslash \left \{ \mu_\textrm{NM} \right \}$ there exists some constant $\delta(\mu')>0$ such that $\mathcal{I}(\mu_\textrm{NM}) < \mathcal{I}(\mu')$ for all $z < \delta$ (Lemma \ref{thm:app_z_small_enough}). \qed
+
+
+
+Given $m=d$ orthogonal frequencies, one can partition the ensemble into $\lfloor \frac{d}{2} \rfloor$ orthogonal pairs, with one remaining frequency if $d$ is odd. 
+For every pair, one can impose negative monotone coupling (Eq.~\ref{eq:negative_monotone_coupling}). 
+We refer to such ensembles as \emph{pairwise norm-coupled} (PNC).
+
+\begin{tcolorbox}[colback=gray!10!white,colframe=gray!50!black,arc=0mm,boxrule=0.5pt]
+\begin{definition}[Pairwise norm-coupled RFs] \label{def:coupled_norms_def}
+RFs are \emph{pairwise norm-coupled} (PNC) if $d$ orthogonal frequencies \smash{$\{\boldsymbol{\omega}_i\}_{i=1}^d$} are arranged in $\lfloor \frac{d}{2}\rfloor$ pairs, each of which is negative montone-coupled so that $F_{\chi_d}(\omega_1) + F_{\chi_d}(\omega_2) = 1$. Different pairs are independent.
+\end{definition}
+\end{tcolorbox}
+
+PNC is no more expensive than i.i.d. norms. 
+To reduce the variance further, one can take multiple independent PNC ensembles.
+An important corollary of Thm.~\ref{thm:pairwise_ot_solution} is as follows. 
+
+\begin{corollary}[Superiority of pairwise norm-coupled RFs] \label{corr:norm_coupled_better}
+    For \textbf{any $m$}, the variance of pairwise norm-coupled RFs is \textbf{guaranteed to be lower} than orthogonal RFs with independent norms, in full generality for RLFs and provided $z$ is small enough for RFFs.
+\end{corollary}
+%Negative monotone coupling is frequently found to be the solution to OT problems in the literature \citep{villani2009optimal}. 
+Negative monotone coupling differs from OT plans usually seen in machine learning; it is a \emph{space-filling} coupling that seeks long transport plans that give diverse samples. 
+However, it is a popular heuristic technique for variance reduction via common random numbers (CRNs) in computational statistics \citep{glasserman1992some}. 
+To our knowledge, this is the first result applying it to improving the convergence of orthogonal RFs, and the first corresponding guarantees for variance reduction.
+We make one further theoretical contribution for RLFs.
+
+\begin{theorem}[Recovering antithetic sampling with RLFs] \label{thm:antithetic}
+    For RLFs with $m=2$  frequencies whose respective orientations $(\widehat{\boldsymbol{\omega}}_1,\widehat{\boldsymbol{\omega}}_2)$ are unconstrained, variance is minimised by conditioning that $\boldsymbol{\omega}_1 =  -\boldsymbol{\omega}_2$ almost surely (that is, opposite directions and equal norms).
+\end{theorem}
+This coupling is known as \emph{antithetic sampling} \citep{hammersley1956new}.
+Thm.~\ref{thm:antithetic} shows that, given a PNC ensemble \smash{$\{\boldsymbol{\omega}_i\}_{i=1}^d$}, we can obtain further variance reduction by augmenting it to \smash{$\{\pm \boldsymbol{\omega}_i\}_{i=1}^d$}.
+Antithetic sampling is also a common (though often heuristically motivated) variance reduction strategy used e.g.~when estimating attention in Performers \citep{choromanski2020rethinking}. 
+We can reinterpret its effectiveness as an OT coupling.
+%Note that Thm.~\ref{thm:antithetic} does \emph{not} hold for RFFs.
+
+\subsection{Pushing further with numerical OT solvers} \label{sec:copulas}
+\pg{Multi-marginal OT}
+In Sec.~\ref{sec:rffs_rlfs_theory} we proposed PNC RFs: a computationally efficient coupling that is guaranteed to reduce variance for any $m$. 
+We obtained it by solving the variance reduction OT problem exactly in $m=2$, then combining \smash{$\lfloor \frac{d}{2} \rfloor$} independent copies to get the ensemble. 
+Can we do better by inducing dependencies between the \emph{all} the $m$ frequencies' norms? 
+Solving this multi-marginal OT problem analytically is a tough open problem.
+
+
+\pg{Copulas as numerical OT solvers} 
+Whilst an analytic solution to the multi-marginal OT variance reduction problem is (for now) out of reach, we can make progress using a numerical OT solver. 
+Our strategy is to restrict $\Lambda_m(\chi_d)$, the full set of joint distributions over $m$ random variables with $\chi_d$ marginals, to a tractable subset amongst which we can efficiently optimise and sample. 
+One such subset is provided by \emph{Gaussian copulas} \citep{nelsen2006introduction,haugh2016introduction}: joint distributions obtained by taking a multivariate Gaussian and pushing each of its coordinates forward first with the Gaussian CDF $F_\mathcal{N}$, and then the $\chi_d$ inverse CDF \smash{$F_{\chi_d}^{-1}$}.
+Fig.~\ref{fig:copula_schematic_main} gives a visual overview for $d=2$.
+If the diagonal terms of the underlying Gaussian covariance matrix $\mathbf{\Sigma}\in \mathbb{R}^{m \times m}$ are equal to $1$ (i.e.~it is a correlation matrix), this has the prescribed marginals so unbiasedness is baked in.
+Meanwhile, correlations \emph{between} the random variables are controlled by the off-diagonal entries of $\mathbf{\Sigma}$.
+This parameterises a broad set of couplings, including PNC (Def.~\ref{def:coupled_norms_def}). 
+In App.~\ref{app:copulas} we demonstrate that it is possible to use gradient descent with the reparameterisation trick to \emph{learn} the optimal copula covariance matrix $\mathbf{\Sigma}$, approximately solving the multi-marginal OT problem.
+We do this by minimising the kernel approximation error on training data, exploiting the fact that all operations to construct the features are differentiable. 
+In doing so, we optimise the RF coupling.
+Remarkably, this data-dependent optimisation does \emph{not} to find couplings much better than PNC: see the training curves in Fig.~\ref{fig:boston-losses}.
+This suggests that our scheme may already be close optimal for $m \neq 2$. 
+Intuitively, one cannot simultaneously anticorrelate too many random variables, so strong pairwise couplings already perform very well.
+Whilst copulas have previously been used as numerical OT solvers \citep{chi2019approximate}, this is (to our knowledge) their first application to learning a Monte Carlo coupling.
+
+\begin{figure}
+\centering \hspace{-2mm}
+    \includestandalone{copula_schematic}
+\caption{Copula schematic for $d=2$.
+Random variables are drawn from a Gaussian distribution with correlation matrix $\mathbf{\Sigma}$.
+They are pushed forward using $F_\mathcal{N}$ then $F_{\chi_d}^{-1}$ to obtain coupled variables with marginal $\chi_d$ distributions.
+$\mathbf{\Sigma}$ is learned using gradient-based optimisation, approximately solving the multi-marginal OT problem in Eq.~\ref{eq:ot_formulation_one}.
+}\label{fig:copula_schematic_main} 
+\end{figure}
+
+\vspace{-2mm}
+\subsection{Experiments for norm-coupled RFs} \label{sec:rff_rlf_exps}
+
+
+%\begin{table}[t!]
+%\resizebox{\textwidth}{!}{
+%\begin{tabular}{l c c c c c c}
+%\toprule
+% & \scshape{Concrete} & \scshape{Abalone} & \scshape{CPU} & \scshape{Power} & \scshape{Airfoil} & \scshape{Boston} \\
+%\midrule
+%\scshape{IID} & $1.000$ {\tiny $\pm 0.020$} & $1.000$ {\tiny $\pm 0.041$} & $1.000$ {\tiny $\pm 0.100$} & $1.000$ {\tiny $\pm 0.016$} & $1.000$ {\tiny $\pm 0.019$} & $1.000$ {\tiny $\pm 0.031$} \\
+%\scshape{Halton sequences} & $0.724$ {\tiny $\pm 0.018$} & $0.777$ {\tiny $\pm 0.041$} & $0.763$ {\tiny $\pm 0.080$} & $0.725$ {\tiny $\pm 0.014$} & $0.724$ {\tiny $\pm 0.017$} & $0.893$ {\tiny $\pm 0.033$} \\
+%\scshape{Orthogonal} & $0.418$ {\tiny $\pm 0.015$} & $0.533$ {\tiny $\pm 0.035$} & $0.599$ {\tiny $\pm 0.111$} & $0.526$ {\tiny $\pm 0.013$} & $0.491$ {\tiny $\pm 0.016$} & $0.365$ {\tiny $\pm 0.026$} \\
+%\scshape{+ Norm-Coupled} & $0.367$ {\tiny $\pm 0.015$} & $0.472$ {\tiny $\pm 0.036$} & $0.567$ {\tiny $\pm 0.089$} & $0.437$ {\tiny $\pm 0.012$} & $0.417$ {\tiny $\pm 0.015$} & $0.328$ {\tiny $\pm 0.024$} \\
+%\bottomrule
+%\end{tabular}
+%}
+%\vspace{1mm}
+%\caption{
+%    Performance on kernel estimation for different estimators on UCI datasets, using orthogonal pairwise norm-coupled RLFs.
+%    Reporting RMSEs to the ground truth kernel values, normalised such that RMSE of the {\scshape IID} estimator is equal to one.
+%    Error bars are standard errors on the reported RMSEs.
+%    All methods in this table are using the same number of $2d$ frequencies in the Laplace features.
+%}
+%\label{tab:rlf}
+%\end{table}
+
+To test PNC RFs (Def.~\ref{def:coupled_norms_def}), we now compute kernel estimates with RFFs and RLFs for UCI datasets. 
+We choose the kernel lengthscale parameters based on a training set, by training a GP (RFFs) or selecting reasonable values for Performers (RLFs) \citep{choromanski2020rethinking}.
+We then compute the kernel approximation RMSE on a test set.
+Full details are in App.~\ref{app:rff_rlf_expt_details}.
+
+\begin{table}[t!]
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c c c}
+\toprule
+\scshape{Fourier Features} & \scshape{Concrete} & \scshape{Abalone} & \scshape{CPU} & \scshape{Power} & \scshape{Airfoil} & \scshape{Boston} \\
+\midrule
+% \scshape{i.i.d.} & $1.000$ {\tiny $\pm 0.028$} & $1.000$ {\tiny $\pm 0.047$} & $1.000$ {\tiny $\pm 0.086$} & $1.000$ {\tiny $\pm 0.037$} & $1.000$ {\tiny $\pm 0.023$} & $1.000$ {\tiny $\pm 0.018$} \\
+% \scshape{Halton coupled} & $1.028$ {\tiny $\pm 0.029$} & $0.996$ {\tiny $\pm 0.047$} & $0.993$ {\tiny $\pm 0.085$} & $0.911$ {\tiny $\pm 0.033$} & $0.926$ {\tiny $\pm 0.021$} & $1.177$ {\tiny $\pm 0.022$} \\
+% \scshape{Orthogonal} & $0.627$ {\tiny $\pm 0.020$} & $0.702$ {\tiny $\pm 0.033$} & $0.604$ {\tiny $\pm 0.068$} & $0.668$ {\tiny $\pm 0.024$} & $0.584$ {\tiny $\pm 0.013$} & $0.639$ {\tiny $\pm 0.016$} \\
+% \scshape{+ PNC} & $\mathbf{0.563}$ {\tiny $\pm 0.019$} & $\mathbf{0.649}$ {\tiny $\pm 0.032$} & $\mathbf{0.530}$ {\tiny $\pm 0.068$} & $\mathbf{0.548}$ {\tiny $\pm 0.020$} & $\mathbf{0.481}$ {\tiny $\pm 0.011$} & $\mathbf{0.606}$ {\tiny $\pm 0.018$} \\
+\scshape{i.i.d.} & $1.000$ {\tiny $\pm 0.028$} & $1.000$ {\tiny $\pm 0.042$} & $1.000$ {\tiny $\pm 0.082$} & $1.000$ {\tiny $\pm 0.037$} & $1.000$ {\tiny $\pm 0.023$} & $1.000$ {\tiny $\pm 0.018$} \\
+\scshape{Halton} & $1.028$ {\tiny $\pm 0.029$} & $0.991$ {\tiny $\pm 0.042$} & $0.995$ {\tiny $\pm 0.082$} & $0.913$ {\tiny $\pm 0.033$} & $0.927$ {\tiny $\pm 0.021$} & $1.176$ {\tiny $\pm 0.022$} \\
+\scshape{Orthogonal} & $0.627$ {\tiny $\pm 0.019$} & $0.535$ {\tiny $\pm 0.023$} & $0.617$ {\tiny $\pm 0.070$} & $0.669$ {\tiny $\pm 0.024$} & $0.586$ {\tiny $\pm 0.013$} & $0.639$ {\tiny $\pm 0.016$} \\
+\scshape{+ PNC} & $\mathbf{0.563}$ {\tiny $\pm 0.019$} & $\mathbf{0.433}$ {\tiny $\pm 0.019$} & $\mathbf{0.544}$ {\tiny $\pm 0.071$} & $\mathbf{0.547}$ {\tiny $\pm 0.020$} & $\mathbf{0.481}$ {\tiny $\pm 0.011$} & $\mathbf{0.606}$ {\tiny $\pm 0.018$} \\
+\midrule
+\scshape{Laplace Features}  & \scshape{Concrete} & \scshape{Abalone} & \scshape{CPU} & \scshape{Power} & \scshape{Airfoil} & \scshape{Boston} \\
+ \midrule
+% \scshape{i.i.d.} & $1.000$ {\tiny $\pm 0.020$} & $1.000$ {\tiny $\pm 0.041$} & $1.000$ {\tiny $\pm 0.100$} & $1.000$ {\tiny $\pm 0.016$} & $1.000$ {\tiny $\pm 0.019$} & $1.000$ {\tiny $\pm 0.031$} \\
+% \scshape{Halton sequences} & $0.724$ {\tiny $\pm 0.018$} & $0.777$ {\tiny $\pm 0.041$} & $0.763$ {\tiny $\pm 0.080$} & $0.725$ {\tiny $\pm 0.014$} & $0.724$ {\tiny $\pm 0.017$} & $0.893$ {\tiny $\pm 0.033$} \\
+% \scshape{Orthogonal} & $0.418$ {\tiny $\pm 0.015$} & $0.533$ {\tiny $\pm 0.035$} & $0.599$ {\tiny $\pm 0.111$} & $0.526$ {\tiny $\pm 0.013$} & $0.491$ {\tiny $\pm 0.016$} & $0.365$ {\tiny $\pm 0.026$} \\
+% \scshape{+ PNC + antithetic} & $\mathbf{0.367}$ {\tiny $\pm 0.015$} & $\mathbf{0.472}$ {\tiny $\pm 0.036$} & $\mathbf{0.567}$ {\tiny $\pm 0.089$} & $\mathbf{0.437}$ {\tiny $\pm 0.012$} & $\mathbf{0.417}$ {\tiny $\pm 0.015$} & $\mathbf{0.328}$ {\tiny $\pm 0.024$} \\
+\scshape{i.i.d.} & $1.000$ {\tiny $\pm 0.092$} & $1.000$ {\tiny $\pm 0.036$} & $1.000$ {\tiny $\pm 0.086$} & $1.000$ {\tiny $\pm 0.018$} & $1.000$ {\tiny $\pm 0.026$} & $1.000$ {\tiny $\pm 0.029$} \\
+\scshape{Halton} & $0.721$ {\tiny $\pm 0.067$} & $0.777$ {\tiny $\pm 0.031$} & $0.779$ {\tiny $\pm 0.084$} & $0.728$ {\tiny $\pm 0.015$} & $0.721$ {\tiny $\pm 0.021$} & $0.893$ {\tiny $\pm 0.028$} \\
+\scshape{Orthogonal} & $0.418$ {\tiny $\pm 0.041$} & $0.546$ {\tiny $\pm 0.026$} & $\mathbf{0.614}$ {\tiny $\pm 0.098$} & $0.527$ {\tiny $\pm 0.013$} & $0.489$ {\tiny $\pm 0.016$} & $0.360$ {\tiny $\pm 0.019$} \\
+\scshape{+ PNC + antithetic} & $\mathbf{0.367}$ {\tiny $\pm 0.043$} & $\mathbf{0.486}$ {\tiny $\pm 0.027$} & $\mathbf{0.618}$ {\tiny $\pm 0.119$} & $\mathbf{0.438}$ {\tiny $\pm 0.013$} & $\mathbf{0.418}$ {\tiny $\pm 0.016$} & $\mathbf{0.324}$ {\tiny $\pm 0.019$} \\
+\bottomrule
+\end{tabular}
+}
+\vspace{1mm}
+\caption{
+    Performance of RFFs and RLFs on kernel estimation with UCI datasets with different coupling schemes, taking $d$ random frequencies for RFFs and $2d$ for RLFs (see main text for details).
+    %For RFFs, we use $d$ frequencies that are i.i.d., Halton \citep{dick2013high}, orthogonal with i.i.d.~norms, or orthogonal with pairwise coupled norms (Def.~\ref{def:coupled_norms_def}). 
+    %For RLFs, we use $2d$ frequencies, also including the antithetic directions without (`orthogonal') or with (`+ PNC + antithetic') the appropriate norm coupling.
+    We show RMSEs to the ground truth kernel values, normalised such that the RMSE of the {\scshape i.i.d.} estimator is equal to one.
+    Lower is better.
+    Error bars are standard errors on the reported RMSEs.
+    Our couplings consistently give the lowest variance.
+   % All methods in this table are using the same number of $d$ frequencies in the Fourier features.
+} \vspace{-5mm}
+\label{tab:rff}
+\end{table}
+
+\pg{Results for variance reduction}
+Table \ref{tab:rff} shows the results. 
+For RFFs, we take $m=d$ orthogonal frequencies.
+For RLFs, we also include their antiparallel directions, giving $m=2d$ frequencies. 
+For each dataset, the RMSEs are normalised by the result with i.i.d.~features. 
+As a further baseline, we include RFs constructed using \emph{Halton sequences} \citep{dick2013high,qmc-rf}, a fixed, off-the-shelf QMC scheme that can provide small gains but is clearly suboptimal. % known to perform worse than orthogonal features \citep{yu2016orthogonal}.
+The third row shows orthogonal frequencies with independent norms \citep{yu2016orthogonal}. %, the most competitive baseline.
+When we \emph{also} couple the frequencies' norms using our PNC scheme (plus antithetic sampling for RLFs, due to Thm \ref{thm:antithetic}), we access even lower estimator variance at no extra computational cost.
+Note that the small $z$ condition for RFFs is found to be nonrestrictive in practice.%; we use standard datasets and choose the kernel lengthscales independent of the coupling.
+
+\pg{Downstream tasks}
+We have achieved our objective of variance reduction, a popular and intensely studied goal in the literature \citep{yu2016orthogonal, rowland2018geometrically, simrfs, likhosherstov2022chefs, qmc-rf, le2013fastfood, bojarski2017structured, choromanski2017unreasonable, lyu2017spherical, shen2017random, dao2017gaussian, munkhoeva2018quadrature}. 
+It is conventionally understood that PNC RFs should therefore improve downstream performance in applications.
+Surprisingly, when we run exhaustive Gaussian process experiments in App.~\ref{app:are_predictions_improved?}, we do \emph{not} observe such a gain.
+
+The reason for this counterintuitive behaviour is as follows.
+When optimising a coupling, we minimise the variance of \emph{pointwise} kernel estimates $\{k(\boldsymbol{x}_i, \boldsymbol{x}_j)\}_{i,j=1}^N$. 
+However, functions like the predictive mean and KL divergence are highly nonlinear in these estimates.
+For example, they may involve inverting a Gram matrix. 
+Downstream quantities therefore depend on the \emph{joint} distribution of the kernel estimates, which are modified nontrivially by the coupling. 
+Variance reduction alone cannot guarantee an improvement.
+
+\pg{Performers} As a concrete example, consider estimating \emph{attention}, \smash{$a_{ij} \coloneqq k(\boldsymbol{x}_i, \boldsymbol{x}_j) / \sum_{l=1}^N k(\boldsymbol{x}_i, \boldsymbol{x}_l) $} using random Laplace features \citep{choromanski2020rethinking}.
+This normalises the kernel evaluation between the $i$ and $j$ tokens by the sum with all the other tokens.
+Taylor expanding, if the kernel estimators have equal means $\mu$, the average mean square error \smash{${\textrm{MSE}(\widehat{a}_{i})} \coloneqq \frac{1}{N} \sum_{j=1}^N \textrm{MSE}(\widehat{a}_{ij})$} obeys
+\small
+\begin{equation} \label{eq:biased_attn_approx}
+    {\textrm{MSE}(\widehat{a}_{i})} = \frac{1}{N^2 \mu^2} \left( \frac{1}{N} \sum_{j=1}^N 
+ \textrm{Var}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_j)) - \frac{1}{N^2} \sum_{j_1, j_2=1}^N  \textrm{Cov}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_1}), \widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_2})) \right) + \mathcal{O}(\frac{1}{N^3}).             
+\end{equation}
+\normalsize
+\begin{wraptable}{r}{0.4\textwidth}
+    \centering \vspace{-4.5mm}
+    \caption{Performer test accuracies on ImageNet with different coupling schemes.
+    Counterintuitively, \emph{maximising} the pointwise kernel estimator variance by positively correlating feature norms boosts performance -- a different OT problem to the naive, obvious choice.} \vspace{-1mm}
+    \begin{tabular}{c|c}
+        \toprule
+        \scshape{\small{Laplace Features}} &\small{\scshape{Test acc.}} \\
+        \midrule
+        \small{\scshape{Orthogonal}} & $0.625$ {\tiny $\pm 0.003$} \\
+        \small{\scshape{Orthogonal + PNC}}  & $0.620$ {\tiny $\pm 0.003$}\\
+        \small{\scshape{Orthogonal + PM}}  & $\mathbf{0.633}$ {\tiny $\pm 0.003$} \\
+        \bottomrule
+    \end{tabular} \label{table:val_prec}
+\end{wraptable}By coupling the frequency norms, PNC reduces \smash{$ \textrm{Var}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_j))$} as intended.
+However, it also reduces the covariance \smash{$\textrm{Cov}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_1}), \widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_2}))$}, so ${\textrm{MSE}(\widehat{a}_i)}$ does not actually substantially improve overall.
+In stark contrast, if we instead take the \emph{positive} monotone (PM) coupling where $\{\omega_i\}_{i=1}^m$ are all equal almost surely, then \smash{$\textrm{Var}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_j))$} is \emph{maximised} (see App.~\ref{app:performers}).
+But these strong, positive correlations also increase \smash{$\textrm{Cov}(\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_1}), \widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_{j_2}))$} by an even greater amount. 
+Hence, we find that ${\textrm{MSE}(\widehat{a}_i)}$ \emph{falls} (see Fig.~\ref{fig:var_fig}).
+This is surprising: maximising the pointwise kernel estimator variance by solving the OT problem with the `wrong' sign on the cost function reduces the MSE of the attention scores after normalisation. %because of the extra correlations.  
+In fact, the improvement is so big that it increases the average test accuracy of Performers trained on ImageNet \citep{deng2009imagenet} by $\textbf{+0.8\%}$, whereas PNC makes no statistically significant difference. 
+See Table \ref{table:val_prec}. 
+This demonstrates the limitations of simple variance reduction and invites a more careful treatment, considering the downstream quantities of interest.
+App.~\ref{app:performers} gives further discussion and transformer training details.
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+%\pg{Setup}
+%We compare our proposed coupling scheme with existing coupling methods for kernel estimation with RFFs (\Cref{tab:rff}) and RLFs (\Cref{tab:rlf}) on UCI datasets.
+%In either case, we set the Gaussian kernel lengthscale to a realistic values using a training set (we do this by either training the lengthscale using a Gaussian process, or by setting it directly using the statistics of the input variables; see appendix \ref{app:copulas} for details on parameter settings), and evaluate the accuracy of each kernel approximation method on a test set.
+
+%\pg{Baselines}
+%The baselines we compare against for this task are: (1) standard iid sampling, which does not use any coupling, (2) Halton sequences, which use low-discrepancy sequences to draw deterministically coupled samples from the uniform hypercube, followed by passing these samples through the inverse Gaussian CDF to obtain frequncy vectors, and (3) orthogonally coupled frequencies, where frequency directions $\hat{\omega}_i$ are constrained to be orthogonal to one another but have iid lengths.
+%For the orthogonally coupled method, we use $d$ orthogonal frequency vectors for RFFs.
+%For RLFs we use $2d$ frequency vectors, including two sets of $d$ orthogonally coupled vectors.
+
+%\pg{Norm-coupled RFs}
+%For the pairwise norm-coupled RFs, we follow \Cref{corr:norm_coupled_better}, and couple ensembles of orthogonal frequency vector in pairs.
+%For RFFs, the vectors $\boldsymbol{\omega}_i$ and $\boldsymbol{\omega}_j$ within each pair of the ensemble are orthogonal, $\boldsymbol{\omega}_i^\top \boldsymbol{\omega}_j = 0,$ and we couple their lengths by setting the covariance of the underlying Gaussian distribution within the copula to $\boldsymbol{\Sigma}_{ij} = -1.$
+%For RLFs, the vectors within each pair are co-linear, and we couple them by setting the associated covariance to $\boldsymbol{\Sigma}_{ij} = 1.$
+
+%\pg{Comparison}
+%\Cref{tab:rff,tab:rlf} show the kernel approximation accuracies, by RMSE to the ground truth kernel, of the methods we consider.
+%While Halton provides marginal gains over iid sampling some datasets, it produces worse results on others, e.g.~Concrete and Boston.
+%Orthogonal coupling improves RMSE accuracy over iid and Halton across all datasets.
+%Augmenting orthogonal coupling with norm-coupling further reduces kernel RMSEs by at least $10\%,$ and sometimes more, across all datasets at a negligible additional computational cost.
+
+
+%\pg{Copulas}
+%One family of joint distributions which naturally incorporates the constraint that its marginals are correct, i.e.~$\mu \in \Lambda_m(\eta),$ is that of copulas.
+%\begin{definition}[Copulas] \label{def:copula}
+%    A $d$-dimensional copula is a cumulative distribution function with uniform marginals.
+%\end{definition}
+
+
+%Statement of scheme. Define `antitone' coupling between a pair of samples. Theoretical guarantees -- for a pair of orthogonal vectors, OT problem is solved exactly (asymptotically for RFFs) by antitone coupling. Corollary -- for $m$ vectors, we are strictly better than i.i.d.
+%Experiments -- Gram matrix approximation on UCI datasets. Get big gains. Downstream task -- sparse spectrum GPs (nice connection to Carl learning frequencies but overfitting; restricting to an unbiased manifold implicitly regularises this tendency).
+%On the limitations of variance reduction: it doesn't help downstream (because gains are coming from estimating the magnitude of each $K$ better rather than the ratio between them; do a toy experiment in the appendix. Future work -- need to think about more sophisticated objectives).
+

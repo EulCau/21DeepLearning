@@ -1,0 +1,225 @@
+\documentclass{article}
+%\usepackage[utf8]{inputenc}
+\usepackage{graphicx,float}
+\usepackage{appendix}
+\graphicspath{ {./images/} }
+\usepackage{amssymb}
+\usepackage{braket}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{bbm}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage[colorlinks=true,
+  pdfstartview=FitV,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=black]{hyperref}
+
+\usepackage{mathtools,amsmath}
+\usepackage{xcolor}
+\usepackage{bm}
+\usepackage{braket}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usepackage{tikz-network}
+\usetikzlibrary{patterns,decorations.pathreplacing,math}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily}
+\definecolor{mygreen}{RGB}{34,139,34}
+\usepackage{wrapfig}
+\usepackage{standalone}
+\usepackage{enumitem}
+\usepackage{svg}
+\usetikzlibrary{decorations.markings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{decorations.pathmorphing}
+\usepackage{tcolorbox}
+\usepackage{cleveref}
+
+\usepackage{enumitem}
+\setlist{nolistsep,leftmargin=*}
+
+
+\usepackage{color}
+\definecolor{OliveGreen}{RGB}{85,107,47}
+\definecolor{NavyBlue}{RGB}{0,0,128}
+
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{proposition}[theorem]{Proposition}
+\newcommand{\pg}[1]{{\bf #1.}}
+
+\tikzset{
+    arrowhead/.pic = {
+    \draw[thick, rotate = 45] (0,0) -- (#1,0);
+    \draw[thick, rotate = 45] (0,0) -- (0, #1);
+    }
+}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2022
+
+
+% ready for submission
+\usepackage[]{iclr2025_conference,times}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+%\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+
+
+\title{Variance-Reducing Couplings for Random \\Features}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+
+\author{Isaac Reid$^1$, Stratis Markou$^1$, Krzysztof Choromanski$^{2,3}$, Richard E. Turner$^1$, \\ \textbf{Adrian Weller}$^{1,4}$ 
+\\ $^1$University of Cambridge, $^2$Google DeepMind, $^3$Columbia, $^4$Alan Turing Institute}
+%\\ \lstinline{ir337@cam.ac.uk}, \lstinline{kchoro@google.com}}
+
+
+\begin{document}
+\iclrfinalcopy 
+\maketitle
+\lhead{Preprint. Under review.}
+
+\begin{abstract}
+Random features (RFs) are a popular technique to scale up kernel methods in machine learning, replacing exact kernel evaluations with stochastic Monte Carlo estimates.
+They underpin models as diverse as efficient transformers (by approximating attention) to sparse spectrum Gaussian processes (by approximating the covariance function). 
+Efficiency can be further improved by speeding up the convergence of these estimates: a \emph{variance reduction} problem. 
+We tackle this through the unifying lens of \emph{optimal transport}, finding couplings to improve RFs defined on both Euclidean and discrete input spaces.  
+They enjoy theoretical guarantees and sometimes provide strong downstream gains, including for scalable approximate inference on graphs.
+We reach surprising conclusions about the benefits and limitations of variance reduction as a paradigm, showing that other properties of the coupling should be optimised for attention estimation in efficient transformers.
+\end{abstract}
+
+\vspace{-3mm}
+\section{Introduction} \vspace{-1mm}
+Kernel methods are ubiquitous in machine learning \citep{kernel-3,kernel-4,kernel-5,kernel-6}.
+%, representing functions as diverse as the Gaussian process covariance function to the Transformer attention mechanism. 
+Through the kernel trick, they provide a mathematically principled and elegant way to perform nonlinear inference using linear learning algorithms. 
+The eponymous positive definite \emph{kernel function} \smash{$k: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$} measures the `similarity' between two datapoints. 
+The input domain \smash{$\mathcal{X}$} may be continuous, e.g.~the set of vectors in \smash{$\mathbb{R}^d,$} or discrete, e.g.~the set of graph nodes or entire graphs.
+
+\pg{Random features for kernel approximation} Though very effective on small datasets, kernel methods suffer from poor scalability. 
+The need to materialise and invert the \emph{Gram matrix} $\mathbf{K} \coloneqq [k(\boldsymbol{x}_i,\boldsymbol{x}_j)]_{i=1}^N$ leads to a time complexity cubic in the size of the dataset $N$. 
+Substantial research has been dedicated to improving scalability by approximating this matrix, a prominent example being \emph{random features} (RFs) \citep{rahimi2007random,rksink,avronkapralov, RF-survey}. 
+These randomised mappings $\phi: \mathbb{R}^d \to \mathbb{R}^{s}$ construct low-dimensional or sparse feature vectors that satisfy
+\begin{equation} \label{eq:kernel_approximation}
+    k(\boldsymbol{x},\boldsymbol{y}) = \mathbb{E}\left(\phi(\boldsymbol{x})^\top \phi(\boldsymbol{y}) \right).
+\end{equation}
+The expectation $\mathbb{E}$ is taken over an ensemble of \emph{random frequencies} $\{\boldsymbol{\omega}\}_{i=1}^m$ drawn from a distribution $\mathcal{\eta}$.
+The space in which $\{\boldsymbol{\omega}\}_{i=1}^m$ live and manner in which they are combined to construct $\phi(\boldsymbol{x})$ depends on the particular input space $\mathcal{X}$ and kernel function $k$ being approximated.
+This paper will consider several examples.
+The set of RFs $\{\phi(\boldsymbol{x}_i)\}_{i=1}^N$ can be used to construct a low-rank or sparse approximation of the Gram matrix, providing substantial space and time complexity savings. % e.g.~when $m \ll N$. 
+RFs exist for a variety of kernels, including for continuous and discrete input spaces \citep{dasgupta_jlt,johnson1984extensions,choromanski2020rethinking,goemans,rahimi2007random,graph_features, tripp2024tanimoto}.
+
+\pg{Variance reduction for RFs} 
+Eq.~\ref{eq:kernel_approximation} can be understood as a \emph{Monte Carlo} (MC) estimate of $k$.
+In applications, it is often found that this estimate converges slowly. 
+This can be addressed by taking many samples $m$, but this undermines the efficiency gains of RFs.
+Therefore, substantial effort has been dedicated to \emph{reducing the variance} of the kernel estimates. 
+Variance reduction methods include quasi-Monte Carlo \citep[QMC;][]{dick2013high, qmc-rf}, common random numbers \citep[CRNs;][]{glasserman1992some}, antithetic variates \citep{hammersley1956new} and structured Monte Carlo \citep[SMC;][]{yu2016orthogonal}. %, which are well-studied in computational statistics. 
+These techniques work by replacing i.i.d.~frequencies $\{\boldsymbol{\omega}_i\}_{i=1}^m$ by a \emph{dependent ensemble}, with the sample dependencies designed to improve RF convergence. 
+
+\pg{Limitations of previous techniques} The best choice of dependencies between $\{\boldsymbol{\omega}_i\}_{i=1}^m$ is an active research area. 
+Though straightforward to apply, standard QMC techniques are suboptimal. 
+They are based on hard-coded `low-discrepancy sequences' so typically do not incorporate information about the particular kernel $k$ being approximated. 
+Empirical performance may be poor and theoretical guarantees lacking in the low-sample, high-dimensional regime \citep{rowland2018geometrically, morokoff1995quasi}, which is precisely where RFs are most important. 
+On the other hand, hand-crafted SMC dependencies, which impose strict geometrical conditions like orthogonality between frequencies, tend to fare better \citep{yu2016orthogonal}. 
+But they are difficult to design, theoretical guarantees are hard-won and optimality is not guaranteed.
+RFs for estimating kernels defined on discrete spaces like the nodes of a graph have only recently been developed \citep{graph_features, tripp2024tanimoto}, so here very few effective variance reduction techniques have even been proposed.
+This paper asks: \emph{can we devise a principled framework for coupling RFs, providing variance reduction  across basis functions and input domains, including with very few samples?}
+
+\pg{Optimal transport}
+To answer this, we propose to frame variance reduction as \emph{optimal transport} (OT): an active research area of applied mathematics that studies how to move (probability) mass between distributions as efficiently as possible \citep{villani2009optimal}. 
+This novel perspective equips us with proof techniques and numerical tools to identify the \emph{best possible dependencies} between samples, giving lower kernel estimator variance compared to previous approaches.
+OT allows us to improve couplings for RFs in both Euclidean and discrete spaces, including with different basis functions. 
+To our knowledge, this has never before been achieved in the same paper.
+
+\pg{Our contributions}
+This work presents unifying strategies to reduce the variance of random features.
+\vspace{-4.25mm}
+\begin{enumerate}
+    \item We frame the problem of variance reduction of RFs as \emph{optimal transport} (OT) (\textbf{Sec.~\ref{sec:background}}), and use this perspective to improve the convergence of \emph{three} popular classes of RFs: random Fourier features, random Laplace features and graph random features. 
+    \item For random Fourier features (RFFs) and random Laplace features (RLFs), we exactly solve the OT problem for the \emph{norms} of $m=2$ orthogonal frequencies (\textbf{Sec.~\ref{sec:rffs_and_rlfs}}). 
+    We introduce \emph{pairwise norm-coupling}, which guarantees lower variance for arbitrary $m$.
+    %, finding a novel coupling with the lowest possible variance (\textbf{Sec.~\ref{sec:rffs_and_rlfs}}).
+    %We use a copula as a numerical OT solver to consider arbitrary $m$.
+    \item For graph random features (GRFs), we couple the \emph{lengths} of random walks by finding a bipartite matching between the quantiles of the marginal distributions (\textbf{Sec.~\ref{sec:grfs}}). 
+    This is the first time a coupling between random walks has been optimised using data, beating hard-coded algorithms.
+    \item We test our algorithms on UCI datasets and real-world graphs, verifying that OT couplings substantially reduce kernel estimator variance (\textbf{Secs \ref{sec:rffs_and_rlfs} and \ref{sec:grfs}}).
+    We show that this sometimes translates to much better performance in downstream tasks, including for approximate inference with scalable graph-based Gaussian processes. % (itself a novel application of GRFs). 
+    However, we also reach surprising conclusions about the limitations of variance reduction for RFs, including for efficient transformers. 
+\end{enumerate}
+\vspace{-0.25mm}All proofs are saved for the Appendices, but are also sketched in the main body where space allows.
+%We will make source code available if accepted.
+
+\vspace{-3mm}
+\section{Preliminaries}  \label{sec:background}\vspace{-2mm}
+\input{background}
+
+\section{Random Fourier features and random Laplace features} \label{sec:rffs_and_rlfs}
+\input{rffs_and_rlfs} 
+
+\vspace{-1mm}
+\section{Graph random features} \label{sec:grfs}
+\vspace{-2mm}
+\input{grfs}
+
+\vspace{-2mm}
+\section{Discussion and outlook} \label{sec:discussion}
+\input{discussion}
+
+
+
+
+\newpage
+\input{acknowledgements}
+\section{Ethics and reproducibility}
+\textbf{Ethics statement}: Our work is foundational with no immediate ethical concerns apparent to us. However, increases in scalability provided by improvements to MC algorithms could exacerbate existing and incipient risks of machine learning, from bad actors or as unintended consequences. 
+
+\textbf{Reproducibility statement}: Every effort has been made to ensure the work's reproducibility. 
+The core algorithms are presented in Defs \ref{def:coupled_norms_def} and \ref{def:coupled_grfs_def}, with exhaustive details and discussion in the Appendices.
+Theoretical results are proved with full assumptions in Apps \ref{app:rff_rlf_theory} and \ref{sec:quad_grfs}, with proof sketches included in the main text for clarity. 
+We will make source code available if accepted.
+All datasets are available online. 
+We give links to suitable repositories in every instance. 
+Where possible, results are reported with uncertainties to facilitate comparison. 
+
+\newpage
+
+%\bibliography{references}
+\input{references}
+\bibliographystyle{plainnat}
+
+\newpage
+
+\appendices
+\input{appendices}
+
+%\input{checklist}
+
+
+
+\end{document}

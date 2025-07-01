@@ -1,0 +1,36 @@
+\pg{From kernel estimation to optimal transport (OT)}
+Define the \emph{kernel estimator} \smash{$\widehat{k}(\boldsymbol{x}_i, \boldsymbol{x}_j) \coloneqq \phi(\boldsymbol{x}_i)^\top \phi(\boldsymbol{x}_j)$}. 
+Recall that $\phi(\cdot)$ is computed using random frequencies $\{\boldsymbol{\omega}_i\}_{i=1}^m$, with the space in which they live, distribution from which they are drawn, and manner in which they are combined dependent on the particular kernel being approximated.
+The estimator is unbiased provided each frequency $\boldsymbol{\omega}_i$ obeys some marginal distribution $\eta$. 
+Importantly, independence of $\{\boldsymbol{\omega}_i\}_{i=1}^m$ is \emph{not} required: any joint distribution with marginals $\eta$ gives an unbiased estimator. We refer to the set of such joint distributions as \emph{couplings}.  
+
+The coupling between the frequencies determines the estimator variance. 
+%It is straightforward to see that 
+We want to solve:
+%Finding the coupling $\mu^*$ that minimises this variance is equivalent to solving
+\begin{equation} \label{eq:first_ot_formulation}
+    \textrm{minimise } \mathcal{I}(\mu) =   \mathbb{E}_{\boldsymbol{\omega}_{1:m} \sim \mu}  c(\boldsymbol{\omega}_{1:m}) \quad \textrm{ for } \quad \mu \in \Lambda_m(\eta),
+\end{equation}
+where we defined the \emph{cost function} $c(\boldsymbol{\omega}_{1:m}) \coloneqq \left( \phi(\boldsymbol{x})^\top \phi(\boldsymbol{y}) \right)^2$ and $\Lambda_m(\eta)$ denotes the set of couplings of $m$ random variables with marginal measures $\eta$. 
+This is precisely the \emph{Kantorovich formulation} of a multi-marginal OT problem (see Eq.~4 of the seminal OT text of \citet{villani2021topics}).
+We will generally consider cost functions where the minimiser exists and we want to find efficient new MC couplings, so the task is to find the \emph{optimal coupling} $\mu^* = \arg \min_{\mu \in \Lambda_m(\chi_d)} \left [ \mathbb{E}_{\omega_{1:m} \sim \mu}  c(\omega_{1:m}) \right]$ with the smallest estimator variance.
+The relationship between variance reduction and OT was also noted by \citet{rowland2018geometrically} in a different context. %the separate context of Gaussian processes.
+%estimating the expected value of functions drawn from Gaussian processes.
+%with different covariance functions. 
+
+\pg{(Approximately) solving the OT problem} 
+The formulation of Eq.~\ref{eq:first_ot_formulation} depends on the particular RF mechanism and kernel being approximated. 
+We will show that one can solve it exactly for RFFs and RLFs (\textbf{Sec.~\ref{sec:rffs_and_rlfs}}) and approximately for GRFs (\textbf{Sec.~\ref{sec:grfs}}), which have input domains $\mathcal{X} = \mathbb{R}^d$ ($d$-dimensional Euclidean space) and $\mathcal{X} = \mathcal{N}$ (the set of graph nodes) respectively.
+This gives new couplings with lower RF variance than previous algorithms. 
+
+
+%For many popular RF constructions, the OT problem in Eq.~\ref{eq:first_ot_formulation} is intractable. 
+%The cost function and corresponding optimal coupling will in general depend on the choice of RF map and data distribution.
+%Moreover, the cost function $c(\boldsymbol{\omega}_{1:m})$ and the set of possible couplings $\Lambda_m(\eta)$ depends on the particular kernel function and RFs being considered; the best coupling wo. 
+%A further practical consideration is that, to be useful, $\mu^*$ must be easy to sample from; even if it guarantees lower variance, an expensive sampling mechanism will obviate any efficiency gains from a coupling.
+%However, we will see that for certain RFs under particular assumptions we can solve the OT problem \emph{exactly}, obtaining computationally lightweight couplings that provide the smallest possible kernel estimator variance.
+%Even if the OT problem is intractable, we can often leverage numerical methods to \emph{approximately} solve Eq.~\ref{eq:first_ot_formulation}. 
+%The formulation of these methods will depend on the input domain of the RF being considered.
+
+%\pg{Remainder of the manuscript} We will show how perspectives from OT can improve the convergence of RFFs and RLFs (Sec.~\ref{sec:rffs_and_rlfs}) and GRFs (Sec.~\ref{sec:grfs}), which have input domains $\mathcal{X} = \mathbb{R}^d$ ($d$-dimensional Euclidean space) and $\mathcal{X} = \mathcal{N}$ (the set of graph nodes) respectively.
+

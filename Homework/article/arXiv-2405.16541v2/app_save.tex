@@ -1,0 +1,160 @@
+\section{Copulas as a numerical OT solver}
+\label{app:copulas}
+
+In this section we provide additional background on Gaussian copulas, as well as the exact details of our experimental setup for the RFF and RLF experiments.
+We also provide further discussion on interpretations of coupling random features for GPs, based on \citep{lazaro2010sparse}, and examine whether better kernel approximations improve the accuracy of the associated approximate posterior predictive.
+
+\subsection{Copulas as numerical OT solvers}
+
+\pg{Copulas}
+Though an analytic solution remains out of reach, we can nonetheless make progress using a \emph{numerical} OT solver. 
+Instead of optimising among the class of \emph{all} joint distributions with prescribed marginals $\Lambda_d(\chi_d)$, we restrict ourselves to a tractable subclass amongst which we can efficiently optimise and sample.
+For this, we turn to the statistical tool of \emph{copulas}.
+A copula is a multivariate cumulative distribution function (CDF) whose marginals are uniformly distributed on $[0, 1],$ while its joint distribution can be arbitrary.
+Given a copula, we can easily enforce the constraint that its marginals are $\chi_d,$ by applying an appropriate CDF, while still retaining necessary flexibility in the joint to reduce estimator variance.
+Copulas can be used to model dependencies between random variables and are popular tools in quantitative finance \citep{nelsen2006introduction,haugh2016introduction}.
+
+\pg{Gaussian copulas}
+The general family of copulas is still intractable to optimise and sample from, so we constrain ourselves to Gaussian copulas.
+These are distributions with uniform marginals whose joint distributions are determined by multivariate Gaussians, as defined below.
+
+\begin{definition}[Gaussian copula]
+    Let \smash{$\{\omega_i\}_{i = 1}^m \sim \mathcal{N}(0, \boldsymbol{\Sigma})$} where \smash{$\boldsymbol{\Sigma} \in \mathbb{R}^{m \times m}$} is a correlation matrix, i.e. a positive definite matrix with unit diagonal, and let $F_{\mathcal{N}}$ be the CDF of the standard univariate Gaussian.
+    We say $\{F_\mathcal{N}(\omega_i)\}_{i = 1}^m$ is distributed according to a Gaussian copula with covariance $\boldsymbol{\Sigma},$ and use the notation $\{F_\mathcal{N}(\omega_i)\}_{i = 1}^m \sim \text{GC}(\boldsymbol{\Sigma})$ to denote this.
+\end{definition}
+
+\pg{Parametrising correlation matrices}
+Gaussian copulas are easy to sample from, since they involve only sampling a multivariate Gaussian and applying the univariate Gaussian CDF.
+We are therefore left with the task of finding an appropriate correlation matrix $\boldsymbol{\Sigma},$ for which we turn to numerical optimisation.
+The family of $m \times m$ correlation matrices can be parameterised by a vector \smash{$\boldsymbol{\theta} \in \mathbb{R}^{m(m - 1) / 2}.$}
+In fact, there exist tractable bijections between unconstrained vectors of real numbers \smash{$\boldsymbol{\theta} \in \mathbb{R}^{m(m - 1) / 2}$} and lower triangular Cholesky factors $\mathbf{L}_{\boldsymbol{\theta}}$ such that $\boldsymbol{\Sigma} = \mathbf{L}_{\boldsymbol{\theta}}\mathbf{L}_{\boldsymbol{\theta}}^\top$ is a valid correlation matrix.
+In particular, suppose that for each $i = 1, \dots, N,$ and $j = 1, \dots, i,$ we have $\theta_{ij} \in \mathbb{R}^+,$ where $\theta_{ii} = 1.$
+Then the parameterisation we use is
+\begin{equation}
+L_{ij} = \begin{cases}
+\frac{\theta_{ij}}{s_i} & \text{ for } i \leq j, \\
+0 & \text{ otherwise},
+\end{cases}
+\end{equation}
+where \smash{$s_i = \sqrt{\sum_{j = 1}^i{\theta_{ij}^2}}.$}
+Note that, since we are directly parameterising the Cholesky factor, we can sample from the associated Gaussian copula with an $\mathcal{O}(m^2)$ computational cost.
+
+\pg{Optimising correlation matrices}
+In order to pick an appropriate correlation matrix $\boldsymbol{\Sigma},$ we optimise it directly to minimise the root mean squared error (RMSE) loss
+\begin{equation}
+    \label{eq:rmseloss}
+    \mathcal{L}(\boldsymbol{\theta}) = \mathbb{E}_{\omega_i}\left[\sqrt{\frac{1}{N^2}\sum_{i, j=1}^N (\phi_{\text{RF}}(\boldsymbol{x}_i)^\top\phi_{\text{RF}}(\boldsymbol{x}_j) - k(\boldsymbol{x}_i, \boldsymbol{x}_j))^2}~\right],
+\end{equation}
+where $\omega_i \sim \text{GC}(\mathbf{L}_{\boldsymbol{\theta}}\mathbf{L}_{\boldsymbol{\theta}}^\top).$
+Note that $\phi_{\text{RF}}$ here depends on $\omega_i,$ though we have suppressed this dependence for simplicity.
+Assuming that $\phi_{\text{RF}}$ is differentiable with respect to $\omega_i,$ which is the case in RFFs and RLFs, we can optimise the copula parameters $\boldsymbol{\theta}$ by computing the loss in \cref{eq:rmseloss}, computing its gradients with respect to $\boldsymbol{\theta},$ and updating its values accordingly.
+
+\subsection{Experimental details for RFF and RLF experiments}
+
+\pg{Overview}
+In both our RFF and RLF experiments, we compare different coupling schemes for approximating the Gaussian kernel.
+The Gaussian kernel, including a lengthscale parameter $\ell,$ an output scale variable $\sigma_v$ and a noise scale parameter $\sigma_n$ takes the form
+$$k(x_i, x_j) = \sigma_v^2 \exp\left(-\frac{1}{2 \ell^2} ||\boldsymbol{x}_i - \boldsymbol{x}_j||_2^2\right).$$
+Our baselines include standard methods for sampling random frequency vectors for use within RFFs and RLFs, including iid sampling and Halton sequences.
+In addition, for both settings, we consider ensembles of frequency vectors that are coupled to have orthogonal directions, but iid lengths.
+For a dataset of dimension $d,$ for RFFs we use ensembles of $d$ orthogonal vectors, and for RLFs we use ensembles of $2d$ vectors including $d$ orthogonal basis vectors and their $d$ anti-parallel vectors.
+
+\pg{Selecting kernel hyperparameters}
+We want to compare our coupling schemes using realistic kernel hyperparameter values, which we determine as follows.
+A realistic application setting for RFFs is within GPs for probabilistic regression.
+Therefore, we first fit a GP on a tractable subset of the data, specifically a maximum of 256 randomly chosen datapoints, to select appropriate parameters  $\ell, \sigma_v$ and $\sigma_n.$
+We optimise the exact GP marginal likelihood with respect to these hyperparameters, and subsequently fix them.
+In RLFs, due to the exponential term in the RLF expression, estimator variance can explode if any sampled frequency $\boldsymbol{\omega}_i$ has even moderately large norm.
+To successfully apply RLFs, it is therefore crucial that $\boldsymbol{\omega}_i^\top \boldsymbol{x} < 1$ for essentially all datapoints in the dataset.
+More concretely, by \cref{lemma:ot_rff_formulation}, we know that the estimator variance for RLFs depends on $||\boldsymbol{x}_i + \boldsymbol{x}_j||_2,$ and that this quantity must be smaller than $1$ for RLFs to provide reasonable estimates for the Gaussian kernel.
+Therefore, we set the lengthscale $\ell$ to two times the average summed norm of the data, namely
+$$\ell = 2 \sum_{i,j=1}^N ||\boldsymbol{x}_i + \boldsymbol{x}_j||_2,$$
+over the training set.
+We train the rest of the kernel parameters, namely $\sigma_v$ and $\sigma_n$ to maximise the marginal likelihood of the data under the exact GP.
+
+\pg{Optimising copula parameters}
+In order to learn the copula parameters $\boldsymbol{\theta},$ we optimise $\boldsymbol{\theta}$ on the training set, and then evaluate the quality of the kernel approximation on a test set.
+
+\pg{Splitting procedure}
+To obtain mean evaluation metrics and standard errors, we evaluate the methods on multiple random splits as follows.
+For each dataset, we conduct cross validation with 20 splits, splitting each dataset into a training and a test set.
+Because we train an exact GP to determine kernel hyperparameters, and because we evaluate its predictive NLL, we need to limit the number of datapoints used in both the training and the test set, which we set to a maximum of 256 points each, by sub-sampling at random without replacement.
+After training the GP and the copula, we evaluate the metrics on the test set, and repeat this procedure for all 20 splits.
+
+\pg{Optimisation details}
+We train both the exact GP as well as the copula using the Adam optimiser \citep{kingma2014adam}, using a learning rate of $10^{-2}.$
+The exact GP optimisation stage converges around a thousand steps, and we run it up to $5000$ steps.
+The Gaussian copula optimisation stage is highly noisy, since the underlying Gaussian joint is resampled at each step.
+
+\subsection{Do better kernel approximations imply better predictions?}
+
+\pg{Kernel and posterior approximations}
+One natural question to ask is whether a better approximation to the kernel function leads to better downstream prediction, e.g.~GP regression.
+For example, suppose that, in the GP regression setting, we have drawn an ensemble of frequency vectors with which we define associated random features $\phi_{\text{RF}},$ and group these in a large design matrix $\boldsymbol{\Phi}$ as
+\begin{equation}
+    \boldsymbol{\Phi}_{ij} = \phi_{\text{RF}}(\boldsymbol{\omega}_i, \boldsymbol{x}_j),
+\end{equation}
+where we have made the dependence of $\phi_{\text{RF}}$ on $\boldsymbol{\omega}_i$ explicit.
+This RF kernel approximation implies an associated linear model, namely 
+\begin{equation}
+    \boldsymbol{y} = \boldsymbol{w} \boldsymbol{\Phi} + \boldsymbol{\epsilon},
+\end{equation}
+where $\boldsymbol{w} \sim \mathcal{N}(\boldsymbol{0}, \boldsymbol{I})$ and $\boldsymbol{\epsilon} \sim \mathcal{N}(\boldsymbol{0}, \sigma_n^2\boldsymbol{I}).$
+The prior covariance of this linear model is $\boldsymbol{\Phi}^\top \boldsymbol{\Phi}  + \sigma_n^2 \boldsymbol{I},$ which is, by construction, equal in expectation to the exact covariance produced by the kernel, namely $\boldsymbol{K} + \sigma_n^2 \boldsymbol{I}$ by construction.
+Now, the predictive means of the approximate linear model are
+\begin{align} \label{eq:mua1}
+    \boldsymbol{\mu}_{\text{approx}} &= \boldsymbol{\Phi}_p\left(\frac{1}{\sigma_n^2}\boldsymbol{\Phi}_d \boldsymbol{\Phi}_d^\top + \boldsymbol{I}\right)^{-1}\boldsymbol{\Phi}_d\boldsymbol{y}, \\
+    \boldsymbol{\mu}_{\text{exact}} &= \boldsymbol{K}_{pd} (\boldsymbol{K}_{dd} + \sigma_n^2 \boldsymbol{I})^{-1}\boldsymbol{y},
+\end{align}
+and the predictive covariances are
+\begin{align} \label{eq:Ca1}
+    \boldsymbol{C}_{\text{approx}} &= \boldsymbol{\Phi}_p^\top \left(\frac{1}{\sigma_n^2}\boldsymbol{\Phi}_d \boldsymbol{\Phi}_d^\top + \boldsymbol{I}\right)^{-1} \boldsymbol{\Phi}_p + \sigma_n^2 \boldsymbol{I}, \\
+    \boldsymbol{C}_{\text{exact}} &= \boldsymbol{K}_{pp} - \boldsymbol{K}_{pd} (\boldsymbol{K}_{dd} + \sigma_n^2 \boldsymbol{I})^{-1}\boldsymbol{K}_{dp}.
+\end{align}
+where $\boldsymbol{\Phi}_d$ and $\boldsymbol{\Phi}_p$ are the design matrices corresponding to the training inputs and prediction outputs respectively, $\boldsymbol{K}_{dd}$ is the covariance matrix corresponding the training inputs, $\boldsymbol{K}_{pp}$ is the covariance matrix corresponding to the prediction inputs and $\boldsymbol{K}_{pd}$ and $\boldsymbol{K}_{pd}$ are the cross-covariance matrices between the training and prediction datapoints.
+As the number of random features increases, these two models become equal.
+But does an improved kernel approximation, via an appropriate coupling scheme, result in more accurate approximations of the predictive mean and covariance?
+In our experiments, we have found that this is not necessarily the case.
+
+\pg{Evaluating posterior approximation quality}
+As \cref{tab:kld} shows, while the kernel approximation can be improved by using pair-wise norm-coupling, this does not necessarily translate to an improved approximation of the posterior predictive.
+In particular, \cref{tab:kld} reports the KL divergence between the exact predictive posterior and the approximate predictive posteriors formed by using either Fourier or Laplace random features.
+To elucidate this further we can, instead of \cref{eq:mua1,eq:Ca1} consider writing out the approximate mean and covariance as
+\begin{equation} 
+    \boldsymbol{\mu}_{\text{exact}} = \tilde{\boldsymbol{K}}_{pd} (\tilde{\boldsymbol{K}}_{dd} + \sigma_n^2 \boldsymbol{I})^{-1}\boldsymbol{y},
+    ~~~\boldsymbol{C}_{\text{exact}} = \tilde{\boldsymbol{K}}_{pp} - \tilde{\boldsymbol{K}}_{pd} (\tilde{\boldsymbol{K}}_{dd} + \sigma_n^2 \boldsymbol{I})^{-1}\tilde{\boldsymbol{K}}_{dp},
+\end{equation}
+where $\tilde{\boldsymbol{K}}_{dd} = \tilde{\boldsymbol{\Phi}}_d^\top \tilde{\boldsymbol{\Phi}}_d,$ 
+$\tilde{\boldsymbol{K}}_{pd} = \tilde{\boldsymbol{\Phi}}_d^\top \tilde{\boldsymbol{\Phi}}_p,$ $\tilde{\boldsymbol{K}}_{pd} = \tilde{\boldsymbol{\Phi}}_p^\top \tilde{\boldsymbol{\Phi}}_d$ and $\tilde{\boldsymbol{K}}_{pp} = \tilde{\boldsymbol{\Phi}}_p^\top \tilde{\boldsymbol{\Phi}}_p.$
+While introducing pairwise coupling improves the accuracy of our kernel approximation, the approximate mean and covariance also depend on the kernel values through a matrix inverse transformation.
+In our experiments, we have found that while pairwise coupling improves the accuracy of $\boldsymbol{\boldsymbol{K}}_{dd}, \boldsymbol{\boldsymbol{K}}_{pd}$ and $\boldsymbol{\boldsymbol{K}}_{pp},$ it did not improve the accuracy of $(\boldsymbol{\boldsymbol{K}}_{dd} + \sigma_n^2 \boldsymbol{I})^{-1},$ and therefore did not improve the overall accuracy of the approximate posterior.
+
+\begin{table}[h!]
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l c c c c c c}
+\toprule
+\scshape{Fourier Features} & \scshape{Concrete} & \scshape{Abalone} & \scshape{CPU} & \scshape{Power} & \scshape{Airfoil} & \scshape{Boston} \\
+ \midrule
+\scshape{IID} & $5.967$ {\tiny $\pm 0.363$} & $0.911$ {\tiny $\pm 0.102$} & $13.887$ {\tiny $\pm 8.971$} & $1.270$ {\tiny $\pm 0.083$} & $4.340$ {\tiny $\pm 0.472$} & $3.416$ {\tiny $\pm 0.378$} \\
+\scshape{Halton} & $6.264$ {\tiny $\pm 0.371$} & $0.864$ {\tiny $\pm 0.098$} & $13.733$ {\tiny $\pm 8.817$} & $0.978$ {\tiny $\pm 0.067$} & $4.004$ {\tiny $\pm 0.430$} & $4.013$ {\tiny $\pm 0.433$} \\
+\scshape{Orthogonal} & $4.706$ {\tiny $\pm 0.317$} & $0.588$ {\tiny $\pm 0.082$} & $12.808$ {\tiny $\pm 8.308$} & $0.434$ {\tiny $\pm 0.042$} & $3.083$ {\tiny $\pm 0.354$} & $2.759$ {\tiny $\pm 0.283$} \\
+\scshape{+ PW Norm-Coupled} & $4.781$ {\tiny $\pm 0.315$} & $0.587$ {\tiny $\pm 0.083$} & $12.919$ {\tiny $\pm 8.331$} & $0.512$ {\tiny $\pm 0.046$} & $3.086$ {\tiny $\pm 0.351$} & $2.769$ {\tiny $\pm 0.284$} \\
+ \midrule
+\scshape{Laplace Features} & \scshape{Concrete} & \scshape{Abalone} & \scshape{CPU} & \scshape{Power} & \scshape{Airfoil} & \scshape{Boston} \\
+ \midrule
+\scshape{IID} & $1.487$ {\tiny $\pm 0.106$} & $0.038$ {\tiny $\pm 0.003$} & $1.860$ {\tiny $\pm 0.415$} & $0.151$ {\tiny $\pm 0.007$} & $0.358$ {\tiny $\pm 0.025$} & $2.123$ {\tiny $\pm 0.196$} \\
+\scshape{Halton} & $1.542$ {\tiny $\pm 0.104$} & $0.039$ {\tiny $\pm 0.003$} & $1.896$ {\tiny $\pm 0.417$} & $0.137$ {\tiny $\pm 0.006$} & $0.357$ {\tiny $\pm 0.024$} & $2.256$ {\tiny $\pm 0.203$} \\
+\scshape{Orthogonal} & $1.164$ {\tiny $\pm 0.113$} & $0.033$ {\tiny $\pm 0.004$} & $1.915$ {\tiny $\pm 0.424$} & $0.029$ {\tiny $\pm 0.002$} & $0.236$ {\tiny $\pm 0.017$} & $1.992$ {\tiny $\pm 0.191$} \\
+\scshape{+ PW Norm-Coupled} & $1.163$ {\tiny $\pm 0.112$} & $0.032$ {\tiny $\pm 0.003$} & $1.870$ {\tiny $\pm 0.411$} & $0.029$ {\tiny $\pm 0.002$} & $0.235$ {\tiny $\pm 0.017$} & $1.988$ {\tiny $\pm 0.192$} \\
+\bottomrule
+\end{tabular}
+}
+\vspace{1mm}
+\caption{
+    Kullback-Leibler divergences between exact and approximate GP predictive posterior on held out test sets.
+    Divergences are reported in nats.
+    Note that we use $d$ features for RFFs and $2d$ features for RLFs.
+    Reported errors are equal to two standard errors, i.e. $98\%$ confidence intervals.
+}
+\label{tab:kld}
+\end{table}
